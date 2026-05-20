@@ -2,7 +2,7 @@
 
 A daily-updated GIF slideshow of your last public GitHub activities, published to a stable URL for README embedding.
 
-This document records **architecture decisions** and an **implementation plan for v0** (core script only: fetch events → generate GIF → save locally). Cron scheduling and cloud upload are out of scope for v0.
+This document records **architecture decisions** and the implementation plan. **v0** (local GIF) and **v1** (scheduler + R2 upload) are implemented.
 
 ---
 
@@ -42,11 +42,12 @@ This document records **architecture decisions** and an **implementation plan fo
 - **Encode:** **ffmpeg** (or `gifski` if you prefer quality/size tradeoffs) to stitch PNGs into one GIF.
 - **Timing:** configurable seconds per slide (e.g. 2.5s); same duration for empty state.
 
-### Operations (later, not v0)
+### Operations (v1)
 
-- **Scheduler:** `node-cron` in the same Node process or a small long-running service — not CI.
-- **Upload:** S3-compatible / R2 / etc., fixed key e.g. `activity.gif`.
-- **README URL:** constant; accept occasional CDN/README cache staleness.
+- **Scheduler:** `src/scheduler.ts` — `node-cron`, six runs daily (9:00, 12:00, 15:00, 18:00, 21:00, 00:00). Optional `CRON_TZ` for IANA timezone.
+- **Upload:** `src/upload.ts` — Cloudflare R2 via S3-compatible API (`@aws-sdk/client-s3`), fixed key `activity.gif` (override with `R2_OBJECT_KEY`).
+- **README URL:** constant public URL; accept occasional CDN/README cache staleness (`R2_CACHE_CONTROL` default `max-age=3600`).
+- **Local-only:** `npm run generate` uses `src/index.ts` → `generate.ts`; no R2 env required.
 
 ---
 
@@ -57,8 +58,11 @@ github-activity-card/
 ├── docs/
 │   └── project-plan.md          # this file
 ├── src/
-│   ├── index.ts                 # CLI entry: orchestrate fetch → render → encode → save
-│   ├── config.ts                # username, paths, slide duration, event whitelist
+│   ├── index.ts                 # CLI: local generate (or --dry-fetch)
+│   ├── generate.ts              # shared pipeline: fetch → render → encode → save
+│   ├── scheduler.ts             # node-cron: generate + upload (6× daily)
+│   ├── upload.ts                # R2 put object (CLI: npm run upload)
+│   ├── config.ts                # username, paths, R2 credentials
 │   ├── fetch-events.ts          # HTTP client + pagination trim to 5
 │   ├── normalize-event.ts       # map GitHub event → slide model
 │   ├── types.ts                 # EventSlide, NormalizedActivity, etc.
@@ -230,24 +234,28 @@ Phase 0 (bootstrap)
 
 ---
 
-## Out of scope (v0)
+## v1 implementation (done)
 
-| Item | Planned for |
-|------|-------------|
-| `node-cron` scheduler | v1 |
-| Cloud upload + fixed URL | v1 |
-| README / deployment docs | v1 |
-| Unit tests | optional; manual verify in v0 |
-| Retry/backoff on 403 rate limit | v1 (or use PAT in dev) |
-| Placeholder GIF when no prior file + failure | v2 |
+| Step | Task | File |
+|------|------|------|
+| 1.1 | Extract shared `generateActivityGif()` | `src/generate.ts` |
+| 1.2 | Keep `npm run generate` local-only | `src/index.ts` |
+| 1.3 | R2 upload with fixed object key | `src/upload.ts` |
+| 1.4 | Cron 6× daily + generate + upload | `src/scheduler.ts` |
+| 1.5 | `loadUploadConfig()` separate from `loadConfig()` | `src/config.ts` |
+
+**Run:** `npm run scheduler` (needs R2 + GitHub env). **Upload only:** `npm run upload`.
 
 ---
 
-## Future: v1 sketch (reference only)
+## Out of scope / later
 
-1. **`src/scheduler.ts`** — `node-cron.schedule('0 12 * * *', () => generate())`.
-2. **`src/upload.ts`** — S3/R2 put `activity.gif` with `Cache-Control` you accept.
-3. **Long-running process** or systemd timer calling the same `generate()` as v0.
+| Item | Notes |
+|------|-------|
+| Unit tests | optional; manual verify |
+| Retry/backoff on 403 rate limit | use PAT in dev |
+| Placeholder GIF when no prior file + failure | v2 |
+| systemd unit examples | optional ops doc |
 
 ---
 

@@ -7,7 +7,10 @@
   "scripts": {
     "build": "tsc",
     "generate": "tsx src/index.ts",
-    "generate:build": "npm run build && node dist/index.js"
+    "generate:build": "npm run build && node dist/index.js",
+    "upload": "tsx src/upload.ts",
+    "scheduler": "tsx src/scheduler.ts",
+    "scheduler:build": "npm run build && node dist/scheduler.js"
   },
   "engines": {
     "node": ">=20"
@@ -20,7 +23,9 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.972.0",
     "dotenv": "^17.4.2",
+    "node-cron": "^4.2.1",
     "playwright": "^1.60.0"
   },
   "devDependencies": {
