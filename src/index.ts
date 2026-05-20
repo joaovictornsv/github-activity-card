@@ -28,7 +28,7 @@ main().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`Error: ${message}`);
   console.error(
-    'Existing output/activity.gif was not modified (if it existed).',
+    'Existing output GIF was not modified (if it existed).',
   );
   process.exit(1);
 });

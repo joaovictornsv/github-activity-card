@@ -25,7 +25,7 @@ cp .env.example .env
 ### Local generation (no cloud)
 
 ```bash
-# Full pipeline: fetch → render → encode → output/activity.gif
+# Full pipeline: fetch → render → encode → output/{GITHUB_USERNAME}-activity.gif
 npm run generate
 
 # Fetch + normalize only (prints slide JSON, no GIF)
@@ -34,7 +34,7 @@ npm run generate -- --dry-fetch
 
 ### Upload to R2
 
-Uploads an existing GIF (default: `output/activity.gif`). Does not fetch or render.
+Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`). Does not fetch or render.
 
 ```bash
 npm run generate   # if you need a fresh file first
@@ -60,7 +60,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 |----------|----------|---------|---------|
 | `GITHUB_USERNAME` | Yes | — | generate, scheduler |
 | `GITHUB_TOKEN` | No | — | generate, scheduler |
-| `OUTPUT_PATH` | No | `output/activity.gif` | generate, upload |
+| `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
 | `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `415` | generate |
 | `CARD_HEIGHT` | No | `96` | generate |
@@ -68,7 +68,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `R2_ACCESS_KEY_ID` | For upload/scheduler | — | upload, scheduler |
 | `R2_SECRET_ACCESS_KEY` | For upload/scheduler | — | upload, scheduler |
 | `R2_BUCKET` | For upload/scheduler | — | upload, scheduler |
-| `R2_OBJECT_KEY` | No | `activity.gif` | upload, scheduler |
+| `R2_OBJECT_KEY` | No | `{GITHUB_USERNAME}-activity.gif` | upload, scheduler |
 | `R2_PUBLIC_URL` | No | — | upload (log URL after put) |
 | `R2_CACHE_CONTROL` | No | `public, max-age=3600` | upload |
 | `CRON_TZ` | No | server local | scheduler |
@@ -84,7 +84,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 README embed (fixed URL if object key never changes):
 
 ```markdown
-![GitHub activity](https://your-public-url/activity.gif)
+![GitHub activity](https://your-public-url/your-username-activity.gif)
 ```
 
 ## Behavior

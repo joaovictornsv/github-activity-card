@@ -20,6 +20,10 @@ export const EVENT_WHITELIST = [
 
 export type WhitelistedEventType = (typeof EVENT_WHITELIST)[number];
 
+export function activityGifFilename(username: string): string {
+  return `${username}-activity.gif`;
+}
+
 export interface AppConfig {
   username: string;
   token: string | undefined;
@@ -116,7 +120,8 @@ export function loadConfig(): AppConfig {
     token: process.env.GITHUB_TOKEN?.trim() || undefined,
     outputPath: path.resolve(
       projectRoot,
-      process.env.OUTPUT_PATH?.trim() || 'output/activity.gif',
+      process.env.OUTPUT_PATH?.trim() ||
+        path.join('output', activityGifFilename(env.GITHUB_USERNAME)),
     ),
     slideDurationSec: parsePositiveFloat(
       process.env.SLIDE_DURATION_SEC,
@@ -161,7 +166,9 @@ function parsePublicUrl(value: string | undefined): string | undefined {
 export function loadUploadConfig(): UploadConfig {
   const env = requireEnvVars(R2_REQUIRED_ENV_VARS, 'R2 upload');
 
-  const objectKey = process.env.R2_OBJECT_KEY?.trim() || 'activity.gif';
+  const username = requireEnvVars(['GITHUB_USERNAME'], 'R2 upload').GITHUB_USERNAME;
+  const objectKey =
+    process.env.R2_OBJECT_KEY?.trim() || activityGifFilename(username);
   if (!objectKey) {
     throw new Error('Invalid R2_OBJECT_KEY: must not be empty');
   }

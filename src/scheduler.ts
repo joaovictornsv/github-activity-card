@@ -30,7 +30,7 @@ async function runScheduledJob(): Promise<void> {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[${new Date().toISOString()}] Scheduled run failed: ${message}`);
     console.error(
-      'Local output/activity.gif and remote object were left unchanged on failure.',
+      'Local output GIF and remote object were left unchanged on failure.',
     );
   }
 }
