@@ -1,0 +1,15 @@
+name: Deploy
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  deploy-apps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy App
+        uses: zcloud-ws/zcloud-deploy-action@main
+        with:
+          env-token: ${{ secrets.QUAVE_CLOUD_ENV_TOKEN }}
+          env: "joaovictornsv-github-activity-card-production"

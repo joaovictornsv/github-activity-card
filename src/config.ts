@@ -32,7 +32,7 @@ export interface AppConfig {
   projectRoot: string;
 }
 
-export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME'] as const;
+export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'] as const;
 
 export const R2_REQUIRED_ENV_VARS = [
   'R2_ACCOUNT_ID',
@@ -90,11 +90,6 @@ function requireEnvVars(
   return values;
 }
 
-function requireEnv(name: string): string {
-  assertRequiredEnvVars([name], 'Configuration');
-  return process.env[name]!.trim();
-}
-
 function parsePositiveFloat(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
   const parsed = Number.parseFloat(value);
@@ -114,10 +109,10 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
 }
 
 export function loadConfig(): AppConfig {
-  assertRequiredEnvVars(APP_REQUIRED_ENV_VARS, 'GitHub activity card');
+  const env = requireEnvVars(APP_REQUIRED_ENV_VARS, 'GitHub activity card');
 
   return {
-    username: requireEnv('GITHUB_USERNAME'),
+    username: env.GITHUB_USERNAME,
     token: process.env.GITHUB_TOKEN?.trim() || undefined,
     outputPath: path.resolve(
       projectRoot,
