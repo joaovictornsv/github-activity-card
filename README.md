@@ -64,6 +64,9 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `415` | generate |
 | `CARD_HEIGHT` | No | `96` | generate |
+| `DEVICE_SCALE_FACTOR` | No | `2` | generate (Playwright screenshot scale; GIF encodes at `CARD_WIDTH ×` this) |
+| `GIF_MAX_COLORS` | No | `256` | generate (ffmpeg palette size, 2–256) |
+| `GIF_BAYER_SCALE` | No | `2` | generate (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
 | `R2_ACCOUNT_ID` | For upload/scheduler | — | upload, scheduler |
 | `R2_ACCESS_KEY_ID` | For upload/scheduler | — | upload, scheduler |
 | `R2_SECRET_ACCESS_KEY` | For upload/scheduler | — | upload, scheduler |

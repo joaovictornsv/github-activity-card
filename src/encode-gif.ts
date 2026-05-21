@@ -42,12 +42,19 @@ async function writeConcatList(
   await fs.writeFile(listPath, `${lines.join('\n')}\n`, 'utf8');
 }
 
+export interface GifEncodeOptions {
+  gifWidth: number;
+  maxColors: number;
+  bayerScale: number;
+}
+
 export async function encodeGif(
   pngPaths: string[],
   outputPath: string,
   slideDurationSec: number,
-  cardWidth: number,
+  options: GifEncodeOptions,
 ): Promise<void> {
+  const { gifWidth, maxColors, bayerScale } = options;
   if (pngPaths.length === 0) {
     throw new Error('encodeGif: no PNG frames provided');
   }
@@ -68,7 +75,7 @@ export async function encodeGif(
     '-i',
     concatListPath,
     '-vf',
-    `fps=10,scale=${cardWidth}:-1:flags=lanczos,palettegen=stats_mode=diff`,
+    `fps=10,scale=${gifWidth}:-1:flags=lanczos,palettegen=max_colors=${maxColors}:stats_mode=full`,
     '-frames:v',
     '1',
     palettePath,
@@ -85,7 +92,7 @@ export async function encodeGif(
     '-i',
     palettePath,
     '-lavfi',
-    `fps=10,scale=${cardWidth}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
+    `fps=10,scale=${gifWidth}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=${bayerScale}:diff_mode=rectangle`,
     '-loop',
     '0',
     quantizedPath,

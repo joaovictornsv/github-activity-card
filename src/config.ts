@@ -37,6 +37,9 @@ export interface AppConfig {
   slideDurationSec: number;
   cardWidth: number;
   cardHeight: number;
+  deviceScaleFactor: number;
+  gifMaxColors: number;
+  gifBayerScale: number;
   maxSlides: number;
   templatesDir: string;
   projectRoot: string;
@@ -118,6 +121,21 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
+function parseIntInRange(
+  value: string | undefined,
+  fallback: number,
+  min: number,
+  max: number,
+  name: string,
+): number {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
+    throw new Error(`Invalid ${name}: must be an integer from ${min} to ${max}`);
+  }
+  return parsed;
+}
+
 export function loadConfig(): AppConfig {
   const env = requireEnvVars(APP_REQUIRED_ENV_VARS, 'GitHub activity card');
 
@@ -135,6 +153,21 @@ export function loadConfig(): AppConfig {
     ),
     cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 415),
     cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 96),
+    deviceScaleFactor: parsePositiveInt(process.env.DEVICE_SCALE_FACTOR, 2),
+    gifMaxColors: parseIntInRange(
+      process.env.GIF_MAX_COLORS,
+      256,
+      2,
+      256,
+      'GIF_MAX_COLORS',
+    ),
+    gifBayerScale: parseIntInRange(
+      process.env.GIF_BAYER_SCALE,
+      2,
+      0,
+      5,
+      'GIF_BAYER_SCALE',
+    ),
     maxSlides: 5,
     templatesDir: path.join(projectRoot, 'templates'),
     projectRoot,

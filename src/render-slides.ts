@@ -94,7 +94,7 @@ export async function renderSlides(
   try {
     const context = await browser.newContext({
       viewport: { width: config.cardWidth, height: config.cardHeight },
-      deviceScaleFactor: 2,
+      deviceScaleFactor: config.deviceScaleFactor,
     });
 
     const pngPaths: string[] = [];

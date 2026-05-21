@@ -32,12 +32,11 @@ export async function generateActivityGif(
 
   try {
     console.log('Encoding GIF…');
-    await encodeGif(
-      pngPaths,
-      tempGifPath,
-      config.slideDurationSec,
-      config.cardWidth,
-    );
+    await encodeGif(pngPaths, tempGifPath, config.slideDurationSec, {
+      gifWidth: config.cardWidth * config.deviceScaleFactor,
+      maxColors: config.gifMaxColors,
+      bayerScale: config.gifBayerScale,
+    });
     await writeGifAtomically(tempGifPath, config.outputPath);
     console.log(`Saved ${config.outputPath}`);
     return config.outputPath;
