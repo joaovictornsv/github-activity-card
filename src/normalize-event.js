@@ -1,17 +1,3 @@
-import { EVENT_WHITELIST } from './config.js';
-
-const WHITELIST_SET = new Set(EVENT_WHITELIST);
-
-const EMPTY_SLIDE = {
-  kind: 'empty',
-  action: 'No recent public activity',
-  description: 'Check back after your next push, PR, or issue',
-  repo: '',
-  url: null,
-  timeAgo: '',
-  icon: 'inbox',
-};
-
 export function formatTimeAgo(isoDate) {
   const then = new Date(isoDate).getTime();
   const now = Date.now();
@@ -247,19 +233,4 @@ export function normalizeEvent(raw) {
     default:
       return null;
   }
-}
-
-/** @deprecated Use buildSlides from enrich-events.js */
-export function selectSlides(events, config) {
-  const slides = events
-    .filter((e) => WHITELIST_SET.has(e.type))
-    .map(normalizeEvent)
-    .filter((s) => s !== null)
-    .slice(0, config.maxSlides);
-
-  if (slides.length === 0) {
-    return [EMPTY_SLIDE];
-  }
-
-  return slides;
 }
