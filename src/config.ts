@@ -20,8 +20,14 @@ export const EVENT_WHITELIST = [
 
 export type WhitelistedEventType = (typeof EVENT_WHITELIST)[number];
 
+export const R2_ACTIVITY_FOLDER = 'github-activity-folder';
+
 export function activityGifFilename(username: string): string {
   return `${username}-activity.gif`;
+}
+
+export function r2ActivityObjectKey(username: string): string {
+  return path.posix.join(R2_ACTIVITY_FOLDER, activityGifFilename(username));
 }
 
 export interface AppConfig {
@@ -168,7 +174,7 @@ export function loadUploadConfig(): UploadConfig {
 
   const username = requireEnvVars(['GITHUB_USERNAME'], 'R2 upload').GITHUB_USERNAME;
   const objectKey =
-    process.env.R2_OBJECT_KEY?.trim() || activityGifFilename(username);
+    process.env.R2_OBJECT_KEY?.trim() || r2ActivityObjectKey(username);
   if (!objectKey) {
     throw new Error('Invalid R2_OBJECT_KEY: must not be empty');
   }
