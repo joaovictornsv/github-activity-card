@@ -202,35 +202,6 @@ function parsePublicUrl(value: string | undefined): string | undefined {
   return trimmed.replace(/\/$/, '');
 }
 
-export interface GistConfig {
-  gistId: string;
-  token: string;
-  filename: string;
-}
-
-/** When `GIST_ID` is set, upload also replaces that file in the gist (requires `gist` PAT scope). */
-export function loadGistConfig(): GistConfig | null {
-  const gistId = process.env.GIST_ID?.trim();
-  if (!gistId) {
-    return null;
-  }
-
-  const token = process.env.GITHUB_TOKEN?.trim();
-  if (!token) {
-    throw new Error(
-      'Gist update: GIST_ID is set but GITHUB_TOKEN is missing. ' +
-        'Use a fine-grained or classic PAT with the gist scope.',
-    );
-  }
-
-  const filename = process.env.GIST_FILENAME?.trim() || 'activity.gif';
-  if (!filename) {
-    throw new Error('Invalid GIST_FILENAME: must not be empty');
-  }
-
-  return { gistId, token, filename };
-}
-
 export function loadUploadConfig(): UploadConfig {
   const env = requireEnvVars(R2_REQUIRED_ENV_VARS, 'R2 upload');
 
