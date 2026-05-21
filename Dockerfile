@@ -19,7 +19,7 @@ ENV NODE_ENV=production
 
 # GIF encoding (not included in the Playwright base image)
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg \
+  && apt-get install -y --no-install-recommends ffmpeg git \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./

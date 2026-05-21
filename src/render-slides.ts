@@ -45,7 +45,6 @@ function fillTemplate(
     .replace(/\{\{ACTION\}\}/g, escapeHtml(slide.action))
     .replace(/\{\{DESCRIPTION\}\}/g, description)
     .replace(/\{\{REPO\}\}/g, repo)
-    .replace(/\{\{TIME_AGO\}\}/g, escapeHtml(slide.timeAgo))
     .replace(/\{\{ICON_SVG\}\}/g, iconSvg(slide.icon))
     .replace(/\{\{SLIDE_DOTS\}\}/g, slideDotsHtml(slideIndex, slideTotal))
     .replace(

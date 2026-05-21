@@ -94,7 +94,7 @@ README embed (fixed URL if object key never changes):
 
 ### Gist mirror (optional)
 
-After each R2 upload, you can keep a public gist in sync for a stable `gist.githubusercontent.com` URL:
+After each R2 upload, you can keep a gist in sync for a stable `gist.githubusercontent.com` URL. Binary GIFs are pushed via **git** (the Gist REST `content` field is text-only and cannot store images).
 
 1. Create a **secret** gist with a single file `activity.gif` (any placeholder content).
 2. Copy the gist ID from the URL (`https://gist.github.com/you/<gist-id>`).
