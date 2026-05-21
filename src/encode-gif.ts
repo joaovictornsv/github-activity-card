@@ -75,7 +75,7 @@ export async function encodeGif(
     '-i',
     concatListPath,
     '-vf',
-    `fps=10,scale=${gifWidth}:-1:flags=lanczos,palettegen=max_colors=${maxColors}:stats_mode=full`,
+    `fps=10,scale=${gifWidth}:-1:flags=lanczos,palettegen=max_colors=${maxColors}:reserve_transparent=1:stats_mode=full`,
     '-frames:v',
     '1',
     palettePath,

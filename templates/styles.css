@@ -14,6 +14,7 @@ body {
   width: var(--card-width);
   height: var(--card-height);
   overflow: hidden;
+  background: transparent;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -24,7 +25,6 @@ body {
 }
 
 body {
-  background: #0d1117;
   color: #e6edf3;
 }
 
@@ -87,7 +87,7 @@ body {
 }
 
 .repo {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #58a6ff;
   white-space: nowrap;
@@ -97,7 +97,7 @@ body {
 }
 
 .action {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: #8b949e;
   white-space: nowrap;
@@ -106,7 +106,7 @@ body {
 }
 
 .description {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.35;
   color: #e6edf3;
@@ -120,13 +120,13 @@ body {
 }
 
 .card[data-kind='empty'] .action {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: #e6edf3;
 }
 
 .card[data-kind='empty'] .description {
-  font-size: 12px;
+  font-size: 13px;
   color: #8b949e;
 }
 

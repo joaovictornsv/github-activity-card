@@ -110,6 +110,7 @@ export async function renderSlides(
       await page.screenshot({
         path: pngPath,
         type: 'png',
+        omitBackground: true,
         clip: {
           x: 0,
           y: 0,
