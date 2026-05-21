@@ -11,7 +11,6 @@ const EMPTY_SLIDE = {
   description: 'Check back after your next push, PR, or issue',
   repo: '',
   url: null,
-  timeAgo: '',
   icon: 'inbox',
 };
 

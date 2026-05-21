@@ -33,19 +33,26 @@ const ICONS = {
   },
 };
 
-const ICON_COLORS = {
-  commit: '#3fb950',
-  branch: '#58a6ff',
-  'pull-request': '#a371f7',
-  issue: '#58a6ff',
-  comment: '#79c0ff',
-  tag: '#d29922',
-  repo: '#8b949e',
-  inbox: '#6e7681',
+export const ACTIVITY_COLORS = {
+  green: '#3fb950',
+  purple: '#a371f7',
+  red: '#f85149',
+  blue: '#58a6ff',
 };
 
-export function iconSvg(icon) {
+const ICON_COLORS = {
+  commit: ACTIVITY_COLORS.green,
+  branch: ACTIVITY_COLORS.blue,
+  'pull-request': ACTIVITY_COLORS.blue,
+  issue: ACTIVITY_COLORS.blue,
+  comment: ACTIVITY_COLORS.blue,
+  tag: ACTIVITY_COLORS.blue,
+  repo: ACTIVITY_COLORS.blue,
+  inbox: ACTIVITY_COLORS.blue,
+};
+
+export function iconSvg(icon, color) {
   const { viewBox, path } = ICONS[icon];
-  const color = ICON_COLORS[icon];
-  return `<svg class="octicon" viewBox="${viewBox}" width="16" height="16" fill="${color}" aria-hidden="true">${path}</svg>`;
+  const fill = color ?? ICON_COLORS[icon];
+  return `<svg class="octicon" viewBox="${viewBox}" width="16" height="16" fill="${fill}" aria-hidden="true">${path}</svg>`;
 }

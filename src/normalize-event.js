@@ -1,32 +1,16 @@
-export function formatTimeAgo(isoDate) {
-  const then = new Date(isoDate).getTime();
-  const now = Date.now();
-  const seconds = Math.max(0, Math.floor((now - then) / 1000));
+import { ACTIVITY_COLORS } from './icons.js';
 
-  if (seconds < 60) return 'just now';
+function pullRequestIconColor(action, merged) {
+  if (action === 'opened') return ACTIVITY_COLORS.green;
+  if (action === 'closed' && merged) return ACTIVITY_COLORS.purple;
+  if (action === 'closed') return ACTIVITY_COLORS.red;
+  return ACTIVITY_COLORS.blue;
+}
 
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) {
-    return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
-  }
-
-  const days = Math.floor(hours / 24);
-  if (days < 30) {
-    return days === 1 ? '1 day ago' : `${days} days ago`;
-  }
-
-  const months = Math.floor(days / 30);
-  if (months < 12) {
-    return months === 1 ? '1 month ago' : `${months} months ago`;
-  }
-
-  const years = Math.floor(months / 12);
-  return years === 1 ? '1 year ago' : `${years} years ago`;
+function issueIconColor(action) {
+  if (action === 'opened') return ACTIVITY_COLORS.green;
+  if (action === 'closed') return ACTIVITY_COLORS.purple;
+  return ACTIVITY_COLORS.blue;
 }
 
 function asRecord(value) {
@@ -65,7 +49,6 @@ function firstLine(text) {
 
 export function normalizeEvent(raw) {
   const repo = raw.repo?.name ?? 'unknown/repo';
-  const timeAgo = formatTimeAgo(raw.created_at);
   const payload = raw.payload ?? {};
 
   switch (raw.type) {
@@ -95,7 +78,6 @@ export function normalizeEvent(raw) {
         description: lastMsg,
         repo,
         url: commitUrl ?? null,
-        timeAgo,
         icon: 'commit',
       };
     }
@@ -121,8 +103,8 @@ export function normalizeEvent(raw) {
         description: title,
         repo,
         url: htmlUrl ?? null,
-        timeAgo,
         icon: 'pull-request',
+        iconColor: pullRequestIconColor(action, merged),
       };
     }
 
@@ -141,8 +123,8 @@ export function normalizeEvent(raw) {
         description: title,
         repo,
         url: htmlUrl ?? null,
-        timeAgo,
         icon: 'issue',
+        iconColor: issueIconColor(action),
       };
     }
 
@@ -166,7 +148,6 @@ export function normalizeEvent(raw) {
         description: title,
         repo,
         url: htmlUrl ?? null,
-        timeAgo,
         icon: 'pull-request',
       };
     }
@@ -189,7 +170,6 @@ export function normalizeEvent(raw) {
         description: body || issueTitle,
         repo,
         url: htmlUrl ?? null,
-        timeAgo,
         icon: 'comment',
       };
     }
@@ -209,7 +189,6 @@ export function normalizeEvent(raw) {
         description: name || tag || '',
         repo,
         url: htmlUrl ?? null,
-        timeAgo,
         icon: 'tag',
       };
     }
@@ -225,7 +204,6 @@ export function normalizeEvent(raw) {
         description: ref ?? repo,
         repo,
         url: null,
-        timeAgo,
         icon: refType === 'tag' ? 'tag' : 'branch',
       };
     }

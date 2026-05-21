@@ -1,42 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { formatTimeAgo, normalizeEvent } from './normalize-event.js';
-
-describe('formatTimeAgo', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-05-21T12:00:00.000Z'));
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('returns "just now" for timestamps under one minute ago', () => {
-    expect(formatTimeAgo('2026-05-21T11:59:30.000Z')).toBe('just now');
-  });
-
-  it('pluralizes minutes and hours', () => {
-    expect(formatTimeAgo('2026-05-21T11:58:00.000Z')).toBe('2 minutes ago');
-    expect(formatTimeAgo('2026-05-21T10:00:00.000Z')).toBe('2 hours ago');
-  });
-
-  it('formats days, months, and years', () => {
-    expect(formatTimeAgo('2026-05-19T12:00:00.000Z')).toBe('2 days ago');
-    expect(formatTimeAgo('2026-04-21T12:00:00.000Z')).toBe('1 month ago');
-    expect(formatTimeAgo('2024-05-21T12:00:00.000Z')).toBe('2 years ago');
-  });
-});
+import { describe, expect, it } from '@jest/globals';
+import { ACTIVITY_COLORS } from './icons.js';
+import { normalizeEvent } from './normalize-event.js';
 
 describe('normalizeEvent', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2026-05-21T12:00:00.000Z'));
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it('normalizes a PushEvent', () => {
     const slide = normalizeEvent({
       type: 'PushEvent',
@@ -58,7 +24,6 @@ describe('normalizeEvent', () => {
       description: 'second',
       repo: 'octocat/hello-world',
       url: 'https://github.com/octocat/hello-world/commit/b',
-      timeAgo: '1 hour ago',
       icon: 'commit',
     });
   });
@@ -83,7 +48,57 @@ describe('normalizeEvent', () => {
       action: 'Merged pull request #42',
       description: 'Add feature',
       icon: 'pull-request',
+      iconColor: ACTIVITY_COLORS.purple,
     });
+  });
+
+  it('assigns icon colors for pull request actions', () => {
+    const opened = normalizeEvent({
+      type: 'PullRequestEvent',
+      repo: { name: 'octocat/hello-world' },
+      payload: {
+        action: 'opened',
+        pull_request: { number: 1, title: 'T', html_url: 'https://example.com/1' },
+      },
+    });
+    const closed = normalizeEvent({
+      type: 'PullRequestEvent',
+      repo: { name: 'octocat/hello-world' },
+      payload: {
+        action: 'closed',
+        pull_request: {
+          number: 2,
+          title: 'T',
+          html_url: 'https://example.com/2',
+          merged: false,
+        },
+      },
+    });
+
+    expect(opened?.iconColor).toBe(ACTIVITY_COLORS.green);
+    expect(closed?.iconColor).toBe(ACTIVITY_COLORS.red);
+  });
+
+  it('assigns icon colors for issue actions', () => {
+    const opened = normalizeEvent({
+      type: 'IssuesEvent',
+      repo: { name: 'octocat/hello-world' },
+      payload: {
+        action: 'opened',
+        issue: { number: 1, title: 'T', html_url: 'https://example.com/1' },
+      },
+    });
+    const closed = normalizeEvent({
+      type: 'IssuesEvent',
+      repo: { name: 'octocat/hello-world' },
+      payload: {
+        action: 'closed',
+        issue: { number: 2, title: 'T', html_url: 'https://example.com/2' },
+      },
+    });
+
+    expect(opened?.iconColor).toBe(ACTIVITY_COLORS.green);
+    expect(closed?.iconColor).toBe(ACTIVITY_COLORS.purple);
   });
 
   it('returns null for unsupported event types', () => {

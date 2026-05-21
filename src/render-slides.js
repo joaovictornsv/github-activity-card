@@ -38,7 +38,7 @@ function fillTemplate(html, slide, slideIndex, slideTotal) {
     .replace(/\{\{ACTION\}\}/g, escapeHtml(slide.action))
     .replace(/\{\{DESCRIPTION\}\}/g, description)
     .replace(/\{\{REPO\}\}/g, repo)
-    .replace(/\{\{ICON_SVG\}\}/g, iconSvg(slide.icon))
+    .replace(/\{\{ICON_SVG\}\}/g, iconSvg(slide.icon, slide.iconColor))
     .replace(/\{\{SLIDE_DOTS\}\}/g, slideDotsHtml(slideIndex, slideTotal))
     .replace(
       'class="card"',
