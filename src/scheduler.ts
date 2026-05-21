@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { loadConfig, loadUploadConfig } from './config.js';
 import { generateActivityGif } from './generate.js';
+import { startHealthServer } from './health-server.js';
 import { uploadActivityGif } from './upload.js';
 
 /** 9 AM, midday, 3 PM, 6 PM, 9 PM, midnight (server local time). */
@@ -38,6 +39,7 @@ async function runScheduledJob(): Promise<void> {
 function main(): void {
   loadConfig();
   loadUploadConfig();
+  startHealthServer();
 
   const timezone = process.env.CRON_TZ?.trim();
   const scheduleLabel = GENERATION_CRON_EXPRESSIONS.join(', ');
