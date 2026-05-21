@@ -2,15 +2,12 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-function runCommand(
-  command: string,
-  args: string[],
-): Promise<void> {
+function runCommand(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
     let stderr = '';
 
-    child.stderr?.on('data', (chunk: Buffer) => {
+    child.stderr?.on('data', (chunk) => {
       stderr += chunk.toString();
     });
 
@@ -29,11 +26,7 @@ function runCommand(
   });
 }
 
-async function writeConcatList(
-  pngPaths: string[],
-  listPath: string,
-  slideDurationSec: number,
-): Promise<void> {
+async function writeConcatList(pngPaths, listPath, slideDurationSec) {
   const lines = pngPaths.flatMap((pngPath) => [
     `file '${pngPath.replace(/'/g, "'\\''")}'`,
     `duration ${slideDurationSec}`,
@@ -42,18 +35,12 @@ async function writeConcatList(
   await fs.writeFile(listPath, `${lines.join('\n')}\n`, 'utf8');
 }
 
-export interface GifEncodeOptions {
-  gifWidth: number;
-  maxColors: number;
-  bayerScale: number;
-}
-
 export async function encodeGif(
-  pngPaths: string[],
-  outputPath: string,
-  slideDurationSec: number,
-  options: GifEncodeOptions,
-): Promise<void> {
+  pngPaths,
+  outputPath,
+  slideDurationSec,
+  options,
+) {
   const { gifWidth, maxColors, bayerScale } = options;
   if (pngPaths.length === 0) {
     throw new Error('encodeGif: no PNG frames provided');

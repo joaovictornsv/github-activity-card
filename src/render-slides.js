@@ -2,11 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { chromium } from 'playwright';
-import type { AppConfig } from './config.js';
 import { iconSvg } from './icons.js';
-import type { ActivitySlide } from './types.js';
 
-function escapeHtml(text: string): string {
+function escapeHtml(text) {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -15,7 +13,7 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function slideDotsHtml(index: number, total: number): string {
+function slideDotsHtml(index, total) {
   if (total <= 1) {
     return '';
   }
@@ -28,12 +26,7 @@ function slideDotsHtml(index: number, total: number): string {
   return `<div class="slide-dots">${dots}</div>`;
 }
 
-function fillTemplate(
-  html: string,
-  slide: ActivitySlide,
-  slideIndex: number,
-  slideTotal: number,
-): string {
+function fillTemplate(html, slide, slideIndex, slideTotal) {
   const repo =
     slide.kind === 'empty' ? '' : escapeHtml(slide.repo || 'unknown/repo');
   const description = escapeHtml(slide.description);
@@ -53,12 +46,7 @@ function fillTemplate(
     );
 }
 
-async function buildSlideHtml(
-  slide: ActivitySlide,
-  slideIndex: number,
-  slideTotal: number,
-  config: AppConfig,
-): Promise<string> {
+async function buildSlideHtml(slide, slideIndex, slideTotal, config) {
   const templatePath = path.join(config.templatesDir, 'slide.html');
   const template = await fs.readFile(templatePath, 'utf8');
   const filled = fillTemplate(template, slide, slideIndex, slideTotal);
@@ -78,10 +66,7 @@ async function buildSlideHtml(
   );
 }
 
-export async function renderSlides(
-  slides: ActivitySlide[],
-  config: AppConfig,
-): Promise<{ pngPaths: string[]; tempDir: string }> {
+export async function renderSlides(slides, config) {
   const tempDir = path.join(
     os.tmpdir(),
     `activity-card-${Date.now()}`,
@@ -96,7 +81,7 @@ export async function renderSlides(
       deviceScaleFactor: config.deviceScaleFactor,
     });
 
-    const pngPaths: string[] = [];
+    const pngPaths = [];
 
     for (let i = 0; i < slides.length; i++) {
       const page = await context.newPage();
@@ -128,6 +113,6 @@ export async function renderSlides(
   }
 }
 
-export async function cleanupTempDir(tempDir: string): Promise<void> {
+export async function cleanupTempDir(tempDir) {
   await fs.rm(tempDir, { recursive: true, force: true });
 }

@@ -3,13 +3,13 @@ import { fetchPublicEvents } from './fetch-events.js';
 import { buildSlides } from './enrich-events.js';
 import { generateActivityGif } from './generate.js';
 
-function parseArgs(argv: string[]): { dryFetch: boolean } {
+function parseArgs(argv) {
   return {
     dryFetch: argv.includes('--dry-fetch'),
   };
 }
 
-async function main(): Promise<void> {
+async function main() {
   const { dryFetch } = parseArgs(process.argv.slice(2));
   const config = loadConfig();
 
@@ -24,7 +24,7 @@ async function main(): Promise<void> {
   await generateActivityGif(config);
 }
 
-main().catch((error: unknown) => {
+main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`Error: ${message}`);
   console.error(

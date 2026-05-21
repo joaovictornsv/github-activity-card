@@ -2,7 +2,6 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import type { GistConfig } from './config.js';
 
 const GITHUB_API = 'https://api.github.com';
 const USER_AGENT = 'github-activity-card/0.1';
@@ -10,18 +9,15 @@ const GIT_COMMIT_NAME = 'github-activity-card';
 const GIT_COMMIT_EMAIL = 'github-activity-card@users.noreply.github.com';
 const TOKEN_IN_REMOTE_URL = /x-access-token:[^@\s]+/g;
 
-function runGit(
-  args: string[],
-  cwd: string,
-): Promise<{ stdout: string; stderr: string }> {
+function runGit(args, cwd) {
   return new Promise((resolve, reject) => {
     const proc = spawn('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
-    proc.stdout?.on('data', (chunk: Buffer) => {
+    proc.stdout?.on('data', (chunk) => {
       stdout += chunk.toString();
     });
-    proc.stderr?.on('data', (chunk: Buffer) => {
+    proc.stderr?.on('data', (chunk) => {
       stderr += chunk.toString();
     });
     proc.on('error', (error) => {
@@ -42,10 +38,10 @@ function runGit(
   });
 }
 
-async function assertGitAvailable(): Promise<void> {
+async function assertGitAvailable() {
   try {
     await runGit(['--version'], process.cwd());
-  } catch (error: unknown) {
+  } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Gist update requires git on PATH (${message}). Install git to publish to a gist.`,
@@ -53,7 +49,7 @@ async function assertGitAvailable(): Promise<void> {
   }
 }
 
-async function fetchGistHtmlUrl(gistId: string, token: string): Promise<string> {
+async function fetchGistHtmlUrl(gistId, token) {
   const response = await fetch(`${GITHUB_API}/gists/${encodeURIComponent(gistId)}`, {
     headers: {
       Accept: 'application/vnd.github+json',
@@ -68,7 +64,7 @@ async function fetchGistHtmlUrl(gistId: string, token: string): Promise<string> 
       `GitHub Gist API error ${response.status}: ${text || response.statusText}`,
     );
   }
-  const gist = (await response.json()) as { html_url?: string };
+  const gist = await response.json();
   if (!gist.html_url) {
     throw new Error(`Gist ${gistId} response missing html_url`);
   }
@@ -79,10 +75,7 @@ async function fetchGistHtmlUrl(gistId: string, token: string): Promise<string> 
  * Updates a gist binary file by pushing to the gist's git repository.
  * The Gist REST `files[].content` field is plain text only (base64 is stored literally).
  */
-export async function updateGistActivityGif(
-  filePath: string,
-  config: GistConfig,
-): Promise<void> {
+export async function updateGistActivityGif(filePath, config) {
   await assertGitAvailable();
 
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gist-upload-'));

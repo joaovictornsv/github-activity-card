@@ -1,6 +1,4 @@
-import type { SlideIcon } from './types.js';
-
-const ICONS: Record<SlideIcon, { viewBox: string; path: string }> = {
+const ICONS = {
   commit: {
     viewBox: '0 0 576 512',
     path: '<path d="M288 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160zm156.8-48C430 361 365.4 416 288 416S146 361 131.2 288L32 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l99.2 0C146 151 210.6 96 288 96s142 55 156.8 128l99.2 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-99.2 0z"/>',
@@ -35,7 +33,7 @@ const ICONS: Record<SlideIcon, { viewBox: string; path: string }> = {
   },
 };
 
-const ICON_COLORS: Record<SlideIcon, string> = {
+const ICON_COLORS = {
   commit: '#3fb950',
   branch: '#58a6ff',
   'pull-request': '#a371f7',
@@ -46,7 +44,7 @@ const ICON_COLORS: Record<SlideIcon, string> = {
   inbox: '#6e7681',
 };
 
-export function iconSvg(icon: SlideIcon): string {
+export function iconSvg(icon) {
   const { viewBox, path } = ICONS[icon];
   const color = ICON_COLORS[icon];
   return `<svg class="octicon" viewBox="${viewBox}" width="16" height="16" fill="${color}" aria-hidden="true">${path}</svg>`;

@@ -1,18 +1,14 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { GistConfig } from './config.js';
 import { loadConfig, loadGistConfig } from './config.js';
 import { updateGistActivityGif } from './update-gist.js';
 
-export async function publishActivityGif(
-  filePath: string,
-  gistConfig: GistConfig,
-): Promise<void> {
+export async function publishActivityGif(filePath, gistConfig) {
   await updateGistActivityGif(filePath, gistConfig);
 }
 
-async function main(): Promise<void> {
+async function main() {
   const appConfig = loadConfig();
   const gistConfig = loadGistConfig();
   if (!gistConfig) {
@@ -38,7 +34,7 @@ async function main(): Promise<void> {
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isMain) {
-  main().catch((error: unknown) => {
+  main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`Publish error: ${message}`);
     process.exit(1);

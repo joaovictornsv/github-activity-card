@@ -1,17 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-bookworm-slim AS builder
-
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY tsconfig.json ./
-COPY src ./src
-RUN npm run build
-
-FROM mcr.microsoft.com/playwright:v1.60.0-noble AS runner
+FROM mcr.microsoft.com/playwright:v1.60.0-noble
 
 WORKDIR /app
 
@@ -25,11 +14,11 @@ RUN apt-get update \
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-COPY --from=builder /app/dist ./dist
+COPY src ./src
 COPY templates ./templates
 
 RUN mkdir -p output
 
 # Long-running scheduler: generate GIF on cron, optionally publish to gist when GIST_ID is set.
-# Override CMD for one-off runs, e.g. ["node", "dist/index.js"] or ["node", "dist/upload.js", "output/your-username-activity.gif"]
-CMD ["node", "dist/scheduler.js"]
+# Override CMD for one-off runs, e.g. ["node", "src/index.js"] or ["node", "src/upload.js", "output/your-username-activity.gif"]
+CMD ["node", "src/scheduler.js"]
