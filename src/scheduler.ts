@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import { loadConfig, loadUploadConfig } from './config.js';
+import { loadConfig, loadGistConfig, loadUploadConfig } from './config.js';
 import { generateActivityGif } from './generate.js';
 import { startHealthServer } from './health-server.js';
-import { uploadActivityGif } from './upload.js';
+import { publishActivityGif } from './upload.js';
 
 /** 9 AM, midday, 3 PM, 6 PM, 9 PM, midnight (server local time). */
 export const GENERATION_CRON_EXPRESSIONS = [
@@ -23,8 +23,9 @@ async function runScheduledJob(): Promise<void> {
     const outputPath = await generateActivityGif(appConfig);
 
     const uploadConfig = loadUploadConfig();
+    const gistConfig = loadGistConfig();
     console.log('Uploading to R2…');
-    await uploadActivityGif(outputPath, uploadConfig);
+    await publishActivityGif(outputPath, uploadConfig, gistConfig);
 
     console.log(`[${new Date().toISOString()}] Scheduled run finished`);
   } catch (error: unknown) {
@@ -39,6 +40,7 @@ async function runScheduledJob(): Promise<void> {
 function main(): void {
   loadConfig();
   loadUploadConfig();
+  loadGistConfig();
   startHealthServer();
 
   const timezone = process.env.CRON_TZ?.trim();
