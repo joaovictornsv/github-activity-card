@@ -34,7 +34,7 @@ npm run generate -- --dry-fetch
 
 ### Upload to R2
 
-Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`). Does not fetch or render.
+Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`) to R2. If `GIST_ID` is set, also replaces `activity.gif` in that gist. Does not fetch or render.
 
 ```bash
 npm run generate   # if you need a fresh file first
@@ -74,6 +74,8 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `R2_OBJECT_KEY` | No | `github-activity-card/{GITHUB_USERNAME}-activity.gif` | upload, scheduler |
 | `R2_PUBLIC_URL` | No | — | upload (log URL after put) |
 | `R2_CACHE_CONTROL` | No | `public, max-age=3600` | upload |
+| `GIST_ID` | No | — | upload, scheduler (when set, updates gist after R2) |
+| `GIST_FILENAME` | No | `activity.gif` | upload, scheduler |
 | `CRON_TZ` | No | server local | scheduler |
 | `SCHEDULER_RUN_ON_START` | No | — | scheduler |
 
@@ -89,6 +91,23 @@ README embed (fixed URL if object key never changes):
 ```markdown
 ![GitHub activity](https://your-public-url/github-activity-card/your-username-activity.gif)
 ```
+
+### Gist mirror (optional)
+
+After each R2 upload, you can keep a public gist in sync for a stable `gist.githubusercontent.com` URL:
+
+1. Create a **secret** gist with a single file `activity.gif` (any placeholder content).
+2. Copy the gist ID from the URL (`https://gist.github.com/you/<gist-id>`).
+3. Set `GIST_ID` and ensure `GITHUB_TOKEN` has **gist** scope (classic PAT) or **Gists: Read and write** (fine-grained).
+4. Optional: `GIST_FILENAME` if your gist file is not named `activity.gif`.
+
+Embed:
+
+```markdown
+![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/activity.gif)
+```
+
+GitHub may cache raw gist URLs briefly; R2 remains the primary CDN if you need aggressive cache control.
 
 ## Behavior
 
