@@ -6,7 +6,7 @@
 
 :root {
   --card-width: 415px;
-  --card-height: 96px;
+  --card-height: 124px;
 }
 
 html,
@@ -33,7 +33,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 3px;
+  gap: 8px;
   width: var(--card-width);
   height: var(--card-height);
   padding: 10px 14px;
@@ -53,15 +53,15 @@ body {
 
 .slide-dot {
   flex-shrink: 0;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #30363d;
 }
 
 .slide-dot.is-active {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   background: #8b949e;
 }
 
@@ -87,7 +87,7 @@ body {
 }
 
 .repo {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #58a6ff;
   white-space: nowrap;
@@ -97,7 +97,7 @@ body {
 }
 
 .action {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: #8b949e;
   white-space: nowrap;
@@ -106,7 +106,7 @@ body {
 }
 
 .description {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.35;
   color: #e6edf3;
@@ -126,7 +126,7 @@ body {
 }
 
 .card[data-kind='empty'] .description {
-  font-size: 13px;
+  font-size: 16px;
   color: #8b949e;
 }
 

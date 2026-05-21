@@ -138,7 +138,7 @@ export function loadConfig(): AppConfig {
       3,
     ),
     cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 415),
-    cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 96),
+    cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 124),
     deviceScaleFactor: parsePositiveInt(process.env.DEVICE_SCALE_FACTOR, 2),
     gifMaxColors: parseIntInRange(
       process.env.GIF_MAX_COLORS,

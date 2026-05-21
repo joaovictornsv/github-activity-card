@@ -63,7 +63,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
 | `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `415` | generate |
-| `CARD_HEIGHT` | No | `96` | generate |
+| `CARD_HEIGHT` | No | `124` | generate |
 | `DEVICE_SCALE_FACTOR` | No | `2` | generate (Playwright screenshot scale; GIF encodes at `CARD_WIDTH ×` this) |
 | `GIF_MAX_COLORS` | No | `256` | generate (ffmpeg palette size, 2–256) |
 | `GIF_BAYER_SCALE` | No | `2` | generate (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
