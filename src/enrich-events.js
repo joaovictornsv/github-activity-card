@@ -1,5 +1,8 @@
 import { EVENT_WHITELIST } from './config.js';
-import { normalizeEvent } from './normalize-event.js';
+import {
+  isMergePullRequestCommitMessage,
+  normalizeEvent,
+} from './normalize-event.js';
 import { GitHubApiError } from './types.js';
 
 const USER_AGENT = 'github-activity-card/0.1';
@@ -75,43 +78,48 @@ async function fetchCommitMessage(repoFullName, sha, config) {
 }
 
 export async function enrichSlide(slide, raw, config) {
-  if (slide.kind === 'empty' || slide.description) {
+  if (slide.kind === 'empty') {
     return slide;
   }
 
   const payload = raw.payload ?? {};
 
-  switch (raw.type) {
-    case 'PushEvent': {
-      const commits = Array.isArray(payload.commits) ? payload.commits : [];
-      const last = commits[commits.length - 1];
-      const fromPayload = asRecord(last)
-        ? truncate(asString(last.message) ?? '')
-        : '';
+  if (raw.type === 'PushEvent') {
+    const commits = Array.isArray(payload.commits) ? payload.commits : [];
+    const last = commits[commits.length - 1];
+    const fromPayload = asRecord(last)
+      ? truncate(asString(last.message) ?? '')
+      : '';
 
-      if (fromPayload) {
-        return {
-          ...slide,
-          description: fromPayload,
-          url:
-            slide.url ??
-            (asRecord(last) ? (asString(last.url) ?? null) : null),
-        };
-      }
+    if (isMergePullRequestCommitMessage(fromPayload)) return null;
 
-      const head = asString(payload.head);
-      if (!head) return slide;
-
-      const { message, url } = await fetchCommitMessage(
-        raw.repo.name,
-        head,
-        config,
-      );
-      if (!message) return slide;
-
-      return { ...slide, description: message, url: url ?? slide.url };
+    if (fromPayload) {
+      return {
+        ...slide,
+        description: fromPayload,
+        url:
+          slide.url ??
+          (asRecord(last) ? (asString(last.url) ?? null) : null),
+      };
     }
 
+    const head = asString(payload.head);
+    if (!head) return slide;
+
+    const { message, url } = await fetchCommitMessage(
+      raw.repo.name,
+      head,
+      config,
+    );
+    if (isMergePullRequestCommitMessage(message)) return null;
+    if (!message) return slide;
+
+    return { ...slide, description: message, url: url ?? slide.url };
+  }
+
+  if (slide.description) return slide;
+
+  switch (raw.type) {
     case 'IssueCommentEvent':
     case 'PullRequestReviewCommentEvent': {
       const comment = asRecord(payload.comment);
@@ -147,7 +155,10 @@ export async function buildSlides(events, config) {
     const slide = normalizeEvent(event);
     if (!slide) continue;
 
-    slides.push(await enrichSlide(slide, event, config));
+    const enriched = await enrichSlide(slide, event, config);
+    if (!enriched) continue;
+
+    slides.push(enriched);
     if (slides.length >= config.maxSlides) break;
   }
 

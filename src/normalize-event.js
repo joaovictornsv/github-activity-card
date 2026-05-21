@@ -2,9 +2,16 @@ import { ACTIVITY_COLORS } from './icons.js';
 
 function pullRequestIconColor(action, merged) {
   if (action === 'opened') return ACTIVITY_COLORS.green;
-  if (action === 'closed' && merged) return ACTIVITY_COLORS.purple;
+  if (action === 'merged' || (action === 'closed' && merged)) {
+    return ACTIVITY_COLORS.purple;
+  }
   if (action === 'closed') return ACTIVITY_COLORS.red;
   return ACTIVITY_COLORS.blue;
+}
+
+function isMergedPullRequest(action, pr) {
+  if (action === 'merged') return true;
+  return pr?.merged === true;
 }
 
 function issueIconColor(action) {
@@ -47,6 +54,12 @@ function firstLine(text) {
   return truncate(text.split('\n')[0]?.trim() ?? text);
 }
 
+export function isMergePullRequestCommitMessage(message) {
+  if (!message) return false;
+  const line = message.split('\n')[0]?.trim() ?? message;
+  return /^Merge pull request #\d+/i.test(line);
+}
+
 export function normalizeEvent(raw) {
   const repo = raw.repo?.name ?? 'unknown/repo';
   const payload = raw.payload ?? {};
@@ -63,6 +76,8 @@ export function normalizeEvent(raw) {
         asRecord(last) && asString(last.message)
           ? firstLine(asString(last.message))
           : '';
+      if (isMergePullRequestCommitMessage(lastMsg)) return null;
+
       const compare = asString(payload.compare);
       const head = asString(payload.head);
       const commitUrl =
@@ -88,10 +103,10 @@ export function normalizeEvent(raw) {
       const number = pr ? asNumber(pr.number) : undefined;
       const title = pr ? firstLine(asString(pr.title)) : '';
       const htmlUrl = pr ? asString(pr.html_url) : undefined;
-      const merged = pr ? pr.merged === true : false;
+      const merged = isMergedPullRequest(action, pr);
 
       let verb = actionLabel(action);
-      if (action === 'closed' && merged) verb = 'Merged';
+      if (merged && action === 'closed') verb = 'Merged';
 
       const actionText = number
         ? `${verb} pull request #${number}`
