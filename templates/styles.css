@@ -36,16 +36,16 @@ body {
   gap: 8px;
   width: var(--card-width);
   height: var(--card-height);
-  padding: 10px 14px;
+  padding: 0px 14px 10px 14px;
   background: #0d1117;
   border: 1px solid #30363d;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .slide-dots {
   position: absolute;
   right: 12px;
-  bottom: 8px;
+  bottom: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
