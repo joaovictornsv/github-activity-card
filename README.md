@@ -68,7 +68,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `R2_ACCESS_KEY_ID` | For upload/scheduler | — | upload, scheduler |
 | `R2_SECRET_ACCESS_KEY` | For upload/scheduler | — | upload, scheduler |
 | `R2_BUCKET` | For upload/scheduler | — | upload, scheduler |
-| `R2_OBJECT_KEY` | No | `{GITHUB_USERNAME}-activity.gif` | upload, scheduler |
+| `R2_OBJECT_KEY` | No | `github-activity-folder/{GITHUB_USERNAME}-activity.gif` | upload, scheduler |
 | `R2_PUBLIC_URL` | No | — | upload (log URL after put) |
 | `R2_CACHE_CONTROL` | No | `public, max-age=3600` | upload |
 | `CRON_TZ` | No | server local | scheduler |
@@ -84,7 +84,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 README embed (fixed URL if object key never changes):
 
 ```markdown
-![GitHub activity](https://your-public-url/your-username-activity.gif)
+![GitHub activity](https://your-public-url/github-activity-folder/your-username-activity.gif)
 ```
 
 ## Behavior
