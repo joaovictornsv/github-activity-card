@@ -48,7 +48,7 @@ async function assertGitAvailable(): Promise<void> {
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Gist update requires git on PATH (${message}). Install git or use R2 only.`,
+      `Gist update requires git on PATH (${message}). Install git to publish to a gist.`,
     );
   }
 }

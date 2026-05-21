@@ -30,6 +30,6 @@ COPY templates ./templates
 
 RUN mkdir -p output
 
-# Long-running scheduler: generate GIF on cron, then upload to R2.
+# Long-running scheduler: generate GIF on cron, optionally publish to gist when GIST_ID is set.
 # Override CMD for one-off runs, e.g. ["node", "dist/index.js"] or ["node", "dist/upload.js", "output/your-username-activity.gif"]
 CMD ["node", "dist/scheduler.js"]

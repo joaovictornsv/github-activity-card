@@ -2,7 +2,7 @@
 
 A daily-updated GIF slideshow of your last public GitHub activities, published to a stable URL for README embedding.
 
-This document records **architecture decisions** and the implementation plan. **v0** (local GIF) and **v1** (scheduler + R2 upload) are implemented.
+This document records **architecture decisions** and the implementation plan. **v0** (local GIF) and **v1** (scheduler + optional gist publish) are implemented.
 
 ---
 
@@ -45,9 +45,8 @@ This document records **architecture decisions** and the implementation plan. **
 ### Operations (v1)
 
 - **Scheduler:** `src/scheduler.ts` — `node-cron`, six runs daily (9:00, 12:00, 15:00, 18:00, 21:00, 00:00). Optional `CRON_TZ` for IANA timezone.
-- **Upload:** `src/upload.ts` — Cloudflare R2 via S3-compatible API (`@aws-sdk/client-s3`), fixed key `activity.gif` (override with `R2_OBJECT_KEY`).
-- **README URL:** constant public URL; accept occasional CDN/README cache staleness (`R2_CACHE_CONTROL` default `max-age=3600`).
-- **Local-only:** `npm run generate` uses `src/index.ts` → `generate.ts`; no R2 env required.
+- **Publish:** `src/upload.ts` — optional GitHub gist update via git (`src/update-gist.ts`); stable `gist.githubusercontent.com` URL for README embed.
+- **Local-only:** `npm run generate` uses `src/index.ts` → `generate.ts`; gist env not required.
 
 ---
 
@@ -61,8 +60,9 @@ github-activity-card/
 │   ├── index.ts                 # CLI: local generate (or --dry-fetch)
 │   ├── generate.ts              # shared pipeline: fetch → render → encode → save
 │   ├── scheduler.ts             # node-cron: generate + upload (6× daily)
-│   ├── upload.ts                # R2 put object (CLI: npm run upload)
-│   ├── config.ts                # username, paths, R2 credentials
+│   ├── upload.ts                # gist publish (CLI: npm run upload)
+│   ├── update-gist.ts           # git push to gist repo
+│   ├── config.ts                # username, paths, gist credentials
 │   ├── fetch-events.ts          # HTTP client + pagination trim to 5
 │   ├── normalize-event.ts       # map GitHub event → slide model
 │   ├── types.ts                 # EventSlide, NormalizedActivity, etc.
@@ -240,11 +240,11 @@ Phase 0 (bootstrap)
 |------|------|------|
 | 1.1 | Extract shared `generateActivityGif()` | `src/generate.ts` |
 | 1.2 | Keep `npm run generate` local-only | `src/index.ts` |
-| 1.3 | R2 upload with fixed object key | `src/upload.ts` |
-| 1.4 | Cron 6× daily + generate + upload | `src/scheduler.ts` |
-| 1.5 | `loadUploadConfig()` separate from `loadConfig()` | `src/config.ts` |
+| 1.3 | Gist publish via git | `src/upload.ts`, `src/update-gist.ts` |
+| 1.4 | Cron 6× daily + generate + optional gist | `src/scheduler.ts` |
+| 1.5 | `loadGistConfig()` separate from `loadConfig()` | `src/config.ts` |
 
-**Run:** `npm run scheduler` (needs R2 + GitHub env). **Upload only:** `npm run upload`.
+**Run:** `npm run scheduler` (needs GitHub env; gist optional). **Publish only:** `npm run upload` (needs `GIST_ID`).
 
 ---
 

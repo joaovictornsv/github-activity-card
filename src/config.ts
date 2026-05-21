@@ -20,14 +20,8 @@ export const EVENT_WHITELIST = [
 
 export type WhitelistedEventType = (typeof EVENT_WHITELIST)[number];
 
-export const R2_ACTIVITY_FOLDER = 'github-activity-card';
-
 export function activityGifFilename(username: string): string {
   return `${username}-activity.gif`;
-}
-
-export function r2ActivityObjectKey(username: string): string {
-  return path.posix.join(R2_ACTIVITY_FOLDER, activityGifFilename(username));
 }
 
 export interface AppConfig {
@@ -47,15 +41,7 @@ export interface AppConfig {
 
 export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'] as const;
 
-export const R2_REQUIRED_ENV_VARS = [
-  'R2_ACCOUNT_ID',
-  'R2_ACCESS_KEY_ID',
-  'R2_SECRET_ACCESS_KEY',
-  'R2_BUCKET',
-] as const;
-
 export type AppRequiredEnvVar = (typeof APP_REQUIRED_ENV_VARS)[number];
-export type R2RequiredEnvVar = (typeof R2_REQUIRED_ENV_VARS)[number];
 
 export class ConfigValidationError extends Error {
   readonly missing: readonly string[];
@@ -174,41 +160,13 @@ export function loadConfig(): AppConfig {
   };
 }
 
-export interface UploadConfig {
-  accountId: string;
-  accessKeyId: string;
-  secretAccessKey: string;
-  bucket: string;
-  objectKey: string;
-  cacheControl: string;
-  publicUrl: string | undefined;
-}
-
-function parsePublicUrl(value: string | undefined): string | undefined {
-  const trimmed = value?.trim();
-  if (!trimmed) return undefined;
-
-  let parsed: URL;
-  try {
-    parsed = new URL(trimmed);
-  } catch {
-    throw new Error(`Invalid R2_PUBLIC_URL: must be a valid URL (${trimmed})`);
-  }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-    throw new Error(
-      `Invalid R2_PUBLIC_URL: must use http or https (${trimmed})`,
-    );
-  }
-  return trimmed.replace(/\/$/, '');
-}
-
 export interface GistConfig {
   gistId: string;
   token: string;
   filename: string;
 }
 
-/** When `GIST_ID` is set, upload also replaces that file in the gist (requires `gist` PAT scope). */
+/** When `GIST_ID` is set, publish replaces that file in the gist (requires `gist` PAT scope). */
 export function loadGistConfig(): GistConfig | null {
   const gistId = process.env.GIST_ID?.trim();
   if (!gistId) {
@@ -229,26 +187,4 @@ export function loadGistConfig(): GistConfig | null {
   }
 
   return { gistId, token, filename };
-}
-
-export function loadUploadConfig(): UploadConfig {
-  const env = requireEnvVars(R2_REQUIRED_ENV_VARS, 'R2 upload');
-
-  const username = requireEnvVars(['GITHUB_USERNAME'], 'R2 upload').GITHUB_USERNAME;
-  const objectKey =
-    process.env.R2_OBJECT_KEY?.trim() || r2ActivityObjectKey(username);
-  if (!objectKey) {
-    throw new Error('Invalid R2_OBJECT_KEY: must not be empty');
-  }
-
-  return {
-    accountId: env.R2_ACCOUNT_ID,
-    accessKeyId: env.R2_ACCESS_KEY_ID,
-    secretAccessKey: env.R2_SECRET_ACCESS_KEY,
-    bucket: env.R2_BUCKET,
-    objectKey,
-    cacheControl:
-      process.env.R2_CACHE_CONTROL?.trim() || 'public, max-age=3600',
-    publicUrl: parsePublicUrl(process.env.R2_PUBLIC_URL),
-  };
 }

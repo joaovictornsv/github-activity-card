@@ -2,14 +2,14 @@
 
 A daily-updated GIF slideshow of your last public GitHub activities, for README embedding.
 
-Generate locally with `npm run generate`, or run the scheduler to refresh and upload to Cloudflare R2 on a fixed cadence.
+Generate locally with `npm run generate`, or run the scheduler to refresh on a fixed cadence and optionally publish to a GitHub gist.
 
 ## Requirements
 
 - **Node.js** 20+
 - **ffmpeg** on `PATH` (GIF encoding)
 - **Playwright** Chromium (installed via npm)
-- **Cloudflare R2** bucket + API token (upload / scheduler only)
+- **git** on `PATH` (gist publish only)
 
 ## Setup
 
@@ -17,7 +17,7 @@ Generate locally with `npm run generate`, or run the scheduler to refresh and up
 npm install
 npx playwright install chromium
 cp .env.example .env
-# Edit .env: GITHUB_USERNAME, and R2 vars if using upload/scheduler
+# Edit .env: GITHUB_USERNAME, and GIST_ID if using upload/scheduler publish
 ```
 
 ## Usage
@@ -32,21 +32,21 @@ npm run generate
 npm run generate -- --dry-fetch
 ```
 
-### Upload to R2
+### Publish to gist
 
-Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`) to R2. If `GIST_ID` is set, also replaces `activity.gif` in that gist. Does not fetch or render.
+Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`) to a GitHub gist. Requires `GIST_ID` and `GITHUB_TOKEN`. Does not fetch or render.
 
 ```bash
 npm run generate   # if you need a fresh file first
 npm run upload
 
-# Or upload a specific path
+# Or publish a specific path
 npm run upload -- path/to/activity.gif
 ```
 
-### Scheduler (generate + upload)
+### Scheduler (generate + optional gist)
 
-Long-running process: runs the full pipeline six times per day at **9:00, 12:00, 15:00, 18:00, 21:00, and 00:00** (server local time unless `CRON_TZ` is set), then uploads to R2.
+Long-running process: runs the full pipeline six times per day at **9:00, 12:00, 15:00, 18:00, 21:00, and 00:00** (server local time unless `CRON_TZ` is set). When `GIST_ID` is set, also updates the gist after each run.
 
 ```bash
 npm run scheduler
@@ -59,7 +59,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | Variable | Required | Default | Used by |
 |----------|----------|---------|---------|
 | `GITHUB_USERNAME` | Yes | — | generate, scheduler |
-| `GITHUB_TOKEN` | No | — | generate, scheduler |
+| `GITHUB_TOKEN` | No | — | generate, scheduler; required when `GIST_ID` is set |
 | `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
 | `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `415` | generate |
@@ -67,34 +67,14 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `DEVICE_SCALE_FACTOR` | No | `2` | generate (Playwright screenshot scale; GIF encodes at `CARD_WIDTH ×` this) |
 | `GIF_MAX_COLORS` | No | `256` | generate (ffmpeg palette size, 2–256) |
 | `GIF_BAYER_SCALE` | No | `2` | generate (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
-| `R2_ACCOUNT_ID` | For upload/scheduler | — | upload, scheduler |
-| `R2_ACCESS_KEY_ID` | For upload/scheduler | — | upload, scheduler |
-| `R2_SECRET_ACCESS_KEY` | For upload/scheduler | — | upload, scheduler |
-| `R2_BUCKET` | For upload/scheduler | — | upload, scheduler |
-| `R2_OBJECT_KEY` | No | `github-activity-card/{GITHUB_USERNAME}-activity.gif` | upload, scheduler |
-| `R2_PUBLIC_URL` | No | — | upload (log URL after put) |
-| `R2_CACHE_CONTROL` | No | `public, max-age=3600` | upload |
-| `GIST_ID` | No | — | upload, scheduler (when set, updates gist after R2) |
+| `GIST_ID` | For upload | — | upload, scheduler (when set, updates gist after generate) |
 | `GIST_FILENAME` | No | `activity.gif` | upload, scheduler |
 | `CRON_TZ` | No | server local | scheduler |
 | `SCHEDULER_RUN_ON_START` | No | — | scheduler |
 
-### R2 setup
+### Gist publish
 
-1. Create an R2 bucket in the Cloudflare dashboard.
-2. Create an API token with **Object Read & Write** on that bucket.
-3. Enable public access (custom domain or `r2.dev` URL) if you embed the GIF in a README.
-4. Set `R2_PUBLIC_URL` to the public base URL (no trailing slash required).
-
-README embed (fixed URL if object key never changes):
-
-```markdown
-![GitHub activity](https://your-public-url/github-activity-card/your-username-activity.gif)
-```
-
-### Gist mirror (optional)
-
-After each R2 upload, you can keep a gist in sync for a stable `gist.githubusercontent.com` URL. Binary GIFs are pushed via **git** (the Gist REST `content` field is text-only and cannot store images).
+Binary GIFs are pushed via **git** (the Gist REST `content` field is text-only and cannot store images).
 
 1. Create a **secret** gist with a single file `activity.gif` (any placeholder content).
 2. Copy the gist ID from the URL (`https://gist.github.com/you/<gist-id>`).
@@ -107,7 +87,7 @@ Embed:
 ![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/activity.gif)
 ```
 
-GitHub may cache raw gist URLs briefly; R2 remains the primary CDN if you need aggressive cache control.
+GitHub may cache raw gist URLs briefly.
 
 ## Behavior
 
@@ -115,15 +95,15 @@ GitHub may cache raw gist URLs briefly; R2 remains the primary CDN if you need a
 - Whitelists activity types (push, PR, issues, reviews, comments, releases, creates)
 - Up to **5** slides; **empty state** if none match
 - On API/render/encode failure: logs error, exits non-zero, **does not overwrite** an existing local GIF
-- Scheduler catches errors per run so the process keeps running; failed runs do not upload
+- Scheduler catches errors per run so the process keeps running; failed runs do not publish
 
 ## Scripts
 
 | Script | Description |
 |--------|-------------|
 | `npm run generate` | Local GIF only |
-| `npm run upload` | Push GIF to R2 |
-| `npm run scheduler` | Cron + generate + upload |
+| `npm run upload` | Push GIF to gist (`GIST_ID` required) |
+| `npm run scheduler` | Cron + generate + optional gist |
 | `npm run build` | Compile TypeScript to `dist/` |
 
 ## Project layout

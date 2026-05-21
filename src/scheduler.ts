@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { loadConfig, loadGistConfig, loadUploadConfig } from './config.js';
+import { loadConfig, loadGistConfig } from './config.js';
 import { generateActivityGif } from './generate.js';
 import { startHealthServer } from './health-server.js';
 import { publishActivityGif } from './upload.js';
@@ -22,24 +22,24 @@ async function runScheduledJob(): Promise<void> {
     const appConfig = loadConfig();
     const outputPath = await generateActivityGif(appConfig);
 
-    const uploadConfig = loadUploadConfig();
     const gistConfig = loadGistConfig();
-    console.log('Uploading to R2…');
-    await publishActivityGif(outputPath, uploadConfig, gistConfig);
+    if (gistConfig) {
+      console.log('Updating gist…');
+      await publishActivityGif(outputPath, gistConfig);
+    }
 
     console.log(`[${new Date().toISOString()}] Scheduled run finished`);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[${new Date().toISOString()}] Scheduled run failed: ${message}`);
     console.error(
-      'Local output GIF and remote object were left unchanged on failure.',
+      'Local output GIF was left unchanged on failure.',
     );
   }
 }
 
 function main(): void {
   loadConfig();
-  loadUploadConfig();
   loadGistConfig();
   startHealthServer();
 
