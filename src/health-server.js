@@ -2,7 +2,7 @@ import http from 'node:http';
 
 const HEALTH_BODY = JSON.stringify({ status: 'ok' });
 
-function parsePort(value: string | undefined): number {
+function parsePort(value) {
   if (!value?.trim()) return 3000;
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 65535) {
@@ -11,7 +11,7 @@ function parsePort(value: string | undefined): number {
   return parsed;
 }
 
-export function startHealthServer(): http.Server {
+export function startHealthServer() {
   const port = parsePort(process.env.PORT);
 
   const server = http.createServer((req, res) => {

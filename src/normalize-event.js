@@ -1,9 +1,8 @@
-import { EVENT_WHITELIST, type AppConfig } from './config.js';
-import type { ActivitySlide, GitHubPublicEvent } from './types.js';
+import { EVENT_WHITELIST } from './config.js';
 
-const WHITELIST_SET = new Set<string>(EVENT_WHITELIST);
+const WHITELIST_SET = new Set(EVENT_WHITELIST);
 
-const EMPTY_SLIDE: ActivitySlide = {
+const EMPTY_SLIDE = {
   kind: 'empty',
   action: 'No recent public activity',
   description: 'Check back after your next push, PR, or issue',
@@ -13,7 +12,7 @@ const EMPTY_SLIDE: ActivitySlide = {
   icon: 'inbox',
 };
 
-export function formatTimeAgo(isoDate: string): string {
+export function formatTimeAgo(isoDate) {
   const then = new Date(isoDate).getTime();
   const now = Date.now();
   const seconds = Math.max(0, Math.floor((now - then) / 1000));
@@ -44,41 +43,41 @@ export function formatTimeAgo(isoDate: string): string {
   return years === 1 ? '1 year ago' : `${years} years ago`;
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+function asRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? value
     : null;
 }
 
-function asString(value: unknown): string | undefined {
+function asString(value) {
   return typeof value === 'string' ? value : undefined;
 }
 
-function asNumber(value: unknown): number | undefined {
+function asNumber(value) {
   return typeof value === 'number' ? value : undefined;
 }
 
-function actionLabel(action: string | undefined): string {
+function actionLabel(action) {
   if (!action) return '';
   return action.charAt(0).toUpperCase() + action.slice(1);
 }
 
-function branchFromRef(ref: string | undefined): string {
+function branchFromRef(ref) {
   if (!ref) return 'branch';
   return ref.replace(/^refs\/heads\//, '');
 }
 
-function truncate(text: string, max = 80): string {
+function truncate(text, max = 80) {
   if (text.length <= max) return text;
   return `${text.slice(0, max - 1)}…`;
 }
 
-function firstLine(text: string | undefined): string {
+function firstLine(text) {
   if (!text) return '';
   return truncate(text.split('\n')[0]?.trim() ?? text);
 }
 
-export function normalizeEvent(raw: GitHubPublicEvent): ActivitySlide | null {
+export function normalizeEvent(raw) {
   const repo = raw.repo?.name ?? 'unknown/repo';
   const timeAgo = formatTimeAgo(raw.created_at);
   const payload = raw.payload ?? {};
@@ -99,7 +98,7 @@ export function normalizeEvent(raw: GitHubPublicEvent): ActivitySlide | null {
       const head = asString(payload.head);
       const commitUrl =
         asRecord(last) && asString(last.url)
-          ? asString(last.url)!
+          ? asString(last.url)
           : head
             ? `https://github.com/${repo}/commit/${head}`
             : compare;
@@ -250,15 +249,12 @@ export function normalizeEvent(raw: GitHubPublicEvent): ActivitySlide | null {
   }
 }
 
-/** @deprecated Use buildSlides from enrich-events.ts */
-export function selectSlides(
-  events: GitHubPublicEvent[],
-  config: AppConfig,
-): ActivitySlide[] {
+/** @deprecated Use buildSlides from enrich-events.js */
+export function selectSlides(events, config) {
   const slides = events
     .filter((e) => WHITELIST_SET.has(e.type))
     .map(normalizeEvent)
-    .filter((s): s is ActivitySlide => s !== null)
+    .filter((s) => s !== null)
     .slice(0, config.maxSlides);
 
   if (slides.length === 0) {

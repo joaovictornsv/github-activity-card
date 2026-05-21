@@ -3,14 +3,11 @@
   "version": "0.1.0",
   "description": "Daily-updated GIF slideshow of your last public GitHub activities",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "build": "tsc",
-    "generate": "tsx src/index.ts",
-    "generate:build": "npm run build && node dist/index.js",
-    "upload": "tsx src/upload.ts",
-    "scheduler": "tsx src/scheduler.ts",
-    "scheduler:build": "npm run build && node dist/scheduler.js"
+    "generate": "node src/index.js",
+    "upload": "node src/upload.js",
+    "scheduler": "node src/scheduler.js"
   },
   "engines": {
     "node": ">=20"
@@ -26,10 +23,5 @@
     "dotenv": "^17.4.2",
     "node-cron": "^4.2.1",
     "playwright": "^1.60.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.9.1",
-    "tsx": "^4.22.3",
-    "typescript": "^6.0.3"
   }
 }

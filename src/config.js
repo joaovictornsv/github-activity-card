@@ -16,37 +16,16 @@ export const EVENT_WHITELIST = [
   'PullRequestReviewCommentEvent',
   'ReleaseEvent',
   'CreateEvent',
-] as const;
+];
 
-export type WhitelistedEventType = (typeof EVENT_WHITELIST)[number];
-
-export function activityGifFilename(username: string): string {
+export function activityGifFilename(username) {
   return `${username}-activity.gif`;
 }
 
-export interface AppConfig {
-  username: string;
-  token: string | undefined;
-  outputPath: string;
-  slideDurationSec: number;
-  cardWidth: number;
-  cardHeight: number;
-  deviceScaleFactor: number;
-  gifMaxColors: number;
-  gifBayerScale: number;
-  maxSlides: number;
-  templatesDir: string;
-  projectRoot: string;
-}
-
-export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'] as const;
-
-export type AppRequiredEnvVar = (typeof APP_REQUIRED_ENV_VARS)[number];
+export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'];
 
 export class ConfigValidationError extends Error {
-  readonly missing: readonly string[];
-
-  constructor(missing: readonly string[], context: string) {
+  constructor(missing, context) {
     const list = missing.join(', ');
     super(
       `${context}: missing required environment variable(s): ${list}. ` +
@@ -57,8 +36,8 @@ export class ConfigValidationError extends Error {
   }
 }
 
-function collectMissingEnvVars(names: readonly string[]): string[] {
-  const missing: string[] = [];
+function collectMissingEnvVars(names) {
+  const missing = [];
   for (const name of names) {
     if (!process.env[name]?.trim()) {
       missing.push(name);
@@ -67,29 +46,23 @@ function collectMissingEnvVars(names: readonly string[]): string[] {
   return missing;
 }
 
-export function assertRequiredEnvVars(
-  names: readonly string[],
-  context: string,
-): void {
+export function assertRequiredEnvVars(names, context) {
   const missing = collectMissingEnvVars(names);
   if (missing.length > 0) {
     throw new ConfigValidationError(missing, context);
   }
 }
 
-function requireEnvVars(
-  names: readonly string[],
-  context: string,
-): Record<string, string> {
+function requireEnvVars(names, context) {
   assertRequiredEnvVars(names, context);
-  const values: Record<string, string> = {};
+  const values = {};
   for (const name of names) {
-    values[name] = process.env[name]!.trim();
+    values[name] = process.env[name].trim();
   }
   return values;
 }
 
-function parsePositiveFloat(value: string | undefined, fallback: number): number {
+function parsePositiveFloat(value, fallback) {
   if (!value) return fallback;
   const parsed = Number.parseFloat(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -98,7 +71,7 @@ function parsePositiveFloat(value: string | undefined, fallback: number): number
   return parsed;
 }
 
-function parsePositiveInt(value: string | undefined, fallback: number): number {
+function parsePositiveInt(value, fallback) {
   if (!value) return fallback;
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -107,13 +80,7 @@ function parsePositiveInt(value: string | undefined, fallback: number): number {
   return parsed;
 }
 
-function parseIntInRange(
-  value: string | undefined,
-  fallback: number,
-  min: number,
-  max: number,
-  name: string,
-): number {
+function parseIntInRange(value, fallback, min, max, name) {
   if (!value) return fallback;
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed < min || parsed > max) {
@@ -122,7 +89,7 @@ function parseIntInRange(
   return parsed;
 }
 
-export function loadConfig(): AppConfig {
+export function loadConfig() {
   const env = requireEnvVars(APP_REQUIRED_ENV_VARS, 'GitHub activity card');
 
   return {
@@ -160,14 +127,8 @@ export function loadConfig(): AppConfig {
   };
 }
 
-export interface GistConfig {
-  gistId: string;
-  token: string;
-  filename: string;
-}
-
 /** When `GIST_ID` is set, publish replaces that file in the gist (requires `gist` PAT scope). */
-export function loadGistConfig(): GistConfig | null {
+export function loadGistConfig() {
   const gistId = process.env.GIST_ID?.trim();
   if (!gistId) {
     return null;

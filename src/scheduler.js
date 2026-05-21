@@ -12,9 +12,9 @@ export const GENERATION_CRON_EXPRESSIONS = [
   '0 18 * * *',
   '0 21 * * *',
   '0 0 * * *',
-] as const;
+];
 
-async function runScheduledJob(): Promise<void> {
+async function runScheduledJob() {
   const startedAt = new Date().toISOString();
   console.log(`[${startedAt}] Scheduled run started`);
 
@@ -29,7 +29,7 @@ async function runScheduledJob(): Promise<void> {
     }
 
     console.log(`[${new Date().toISOString()}] Scheduled run finished`);
-  } catch (error: unknown) {
+  } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[${new Date().toISOString()}] Scheduled run failed: ${message}`);
     console.error(
@@ -38,7 +38,7 @@ async function runScheduledJob(): Promise<void> {
   }
 }
 
-function main(): void {
+function main() {
   loadConfig();
   loadGistConfig();
   startHealthServer();
@@ -72,7 +72,7 @@ function main(): void {
 
 try {
   main();
-} catch (error: unknown) {
+} catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`Configuration error: ${message}`);
   process.exit(1);

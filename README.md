@@ -104,8 +104,3 @@ GitHub may cache raw gist URLs briefly.
 | `npm run generate` | Local GIF only |
 | `npm run upload` | Push GIF to gist (`GIST_ID` required) |
 | `npm run scheduler` | Cron + generate + optional gist |
-| `npm run build` | Compile TypeScript to `dist/` |
-
-## Project layout
-
-See [`docs/project-plan.md`](docs/project-plan.md) for architecture and implementation notes.

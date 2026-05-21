@@ -1,12 +1,11 @@
-import { EVENT_WHITELIST, type AppConfig } from './config.js';
+import { EVENT_WHITELIST } from './config.js';
 import { normalizeEvent } from './normalize-event.js';
-import type { ActivitySlide, GitHubPublicEvent } from './types.js';
 import { GitHubApiError } from './types.js';
 
 const USER_AGENT = 'github-activity-card/0.1';
-const WHITELIST_SET = new Set<string>(EVENT_WHITELIST);
+const WHITELIST_SET = new Set(EVENT_WHITELIST);
 
-const EMPTY_SLIDE: ActivitySlide = {
+const EMPTY_SLIDE = {
   kind: 'empty',
   action: 'No recent public activity',
   description: 'Check back after your next push, PR, or issue',
@@ -16,23 +15,23 @@ const EMPTY_SLIDE: ActivitySlide = {
   icon: 'inbox',
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+function asRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? value
     : null;
 }
 
-function asString(value: unknown): string | undefined {
+function asString(value) {
   return typeof value === 'string' ? value : undefined;
 }
 
-function truncate(text: string, max = 80): string {
+function truncate(text, max = 80) {
   const line = text.split('\n')[0]?.trim() ?? text;
   if (line.length <= max) return line;
   return `${line.slice(0, max - 1)}…`;
 }
 
-function parseRepoParts(repoFullName: string): { owner: string; repo: string } | null {
+function parseRepoParts(repoFullName) {
   const slash = repoFullName.indexOf('/');
   if (slash <= 0) return null;
   return {
@@ -41,8 +40,8 @@ function parseRepoParts(repoFullName: string): { owner: string; repo: string } |
   };
 }
 
-async function githubGet<T>(url: string, config: AppConfig): Promise<T> {
-  const headers: Record<string, string> = {
+async function githubGet(url, config) {
+  const headers = {
     Accept: 'application/vnd.github+json',
     'User-Agent': USER_AGENT,
     'X-GitHub-Api-Version': '2022-11-28',
@@ -58,22 +57,15 @@ async function githubGet<T>(url: string, config: AppConfig): Promise<T> {
       response.status,
     );
   }
-  return response.json() as Promise<T>;
+  return response.json();
 }
 
-async function fetchCommitMessage(
-  repoFullName: string,
-  sha: string,
-  config: AppConfig,
-): Promise<{ message: string; url: string | null }> {
+async function fetchCommitMessage(repoFullName, sha, config) {
   const parts = parseRepoParts(repoFullName);
   if (!parts) return { message: '', url: null };
 
   const url = `https://api.github.com/repos/${parts.owner}/${parts.repo}/commits/${sha}`;
-  const data = await githubGet<{
-    html_url?: string;
-    commit?: { message?: string };
-  }>(url, config);
+  const data = await githubGet(url, config);
 
   const message = data.commit?.message ? truncate(data.commit.message) : '';
 
@@ -83,11 +75,7 @@ async function fetchCommitMessage(
   };
 }
 
-export async function enrichSlide(
-  slide: ActivitySlide,
-  raw: GitHubPublicEvent,
-  config: AppConfig,
-): Promise<ActivitySlide> {
+export async function enrichSlide(slide, raw, config) {
   if (slide.kind === 'empty' || slide.description) {
     return slide;
   }
@@ -151,11 +139,8 @@ export async function enrichSlide(
   }
 }
 
-export async function buildSlides(
-  events: GitHubPublicEvent[],
-  config: AppConfig,
-): Promise<ActivitySlide[]> {
-  const slides: ActivitySlide[] = [];
+export async function buildSlides(events, config) {
+  const slides = [];
 
   for (const event of events) {
     if (!WHITELIST_SET.has(event.type)) continue;
