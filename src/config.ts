@@ -20,7 +20,7 @@ export const EVENT_WHITELIST = [
 
 export type WhitelistedEventType = (typeof EVENT_WHITELIST)[number];
 
-export const R2_ACTIVITY_FOLDER = 'github-activity-folder';
+export const R2_ACTIVITY_FOLDER = 'github-activity-card';
 
 export function activityGifFilename(username: string): string {
   return `${username}-activity.gif`;
