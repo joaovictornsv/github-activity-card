@@ -15,7 +15,25 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function fillTemplate(html: string, slide: ActivitySlide): string {
+function slideDotsHtml(index: number, total: number): string {
+  if (total <= 1) {
+    return '';
+  }
+
+  const dots = Array.from({ length: total }, (_, i) => {
+    const active = i === index ? ' is-active' : '';
+    return `<span class="slide-dot${active}" aria-hidden="true"></span>`;
+  }).join('');
+
+  return `<div class="slide-dots">${dots}</div>`;
+}
+
+function fillTemplate(
+  html: string,
+  slide: ActivitySlide,
+  slideIndex: number,
+  slideTotal: number,
+): string {
   const repo =
     slide.kind === 'empty' ? '' : escapeHtml(slide.repo || 'unknown/repo');
   const description = escapeHtml(slide.description);
@@ -29,6 +47,7 @@ function fillTemplate(html: string, slide: ActivitySlide): string {
     .replace(/\{\{REPO\}\}/g, repo)
     .replace(/\{\{TIME_AGO\}\}/g, escapeHtml(slide.timeAgo))
     .replace(/\{\{ICON_SVG\}\}/g, iconSvg(slide.icon))
+    .replace(/\{\{SLIDE_DOTS\}\}/g, slideDotsHtml(slideIndex, slideTotal))
     .replace(
       'class="card"',
       `class="card${noDescription}"`,
@@ -37,11 +56,13 @@ function fillTemplate(html: string, slide: ActivitySlide): string {
 
 async function buildSlideHtml(
   slide: ActivitySlide,
+  slideIndex: number,
+  slideTotal: number,
   config: AppConfig,
 ): Promise<string> {
   const templatePath = path.join(config.templatesDir, 'slide.html');
   const template = await fs.readFile(templatePath, 'utf8');
-  const filled = fillTemplate(template, slide);
+  const filled = fillTemplate(template, slide, slideIndex, slideTotal);
 
   const stylesPath = path.join(config.templatesDir, 'styles.css');
   const styles = await fs.readFile(stylesPath, 'utf8');
@@ -80,7 +101,7 @@ export async function renderSlides(
 
     for (let i = 0; i < slides.length; i++) {
       const page = await context.newPage();
-      const html = await buildSlideHtml(slides[i], config);
+      const html = await buildSlideHtml(slides[i], i, slides.length, config);
       await page.setContent(html, { waitUntil: 'load' });
 
       const pngPath = path.join(

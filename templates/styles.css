@@ -29,6 +29,7 @@ body {
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,6 +40,29 @@ body {
   background: #0d1117;
   border: 1px solid #30363d;
   border-radius: 6px;
+}
+
+.slide-dots {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.slide-dot {
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #30363d;
+}
+
+.slide-dot.is-active {
+  width: 6px;
+  height: 6px;
+  background: #8b949e;
 }
 
 .row-head {
