@@ -1,8 +1,15 @@
 import cron from 'node-cron';
 import { fileURLToPath } from 'node:url';
-import { loadConfig, loadGistConfig } from './config.js';
-import { generateActivityGif } from './generate.js';
+import {
+  loadActivitySummaryConfig,
+  loadActivitySummaryGistConfig,
+  loadConfig,
+  loadGistConfig,
+} from './config.js';
+import { generateActivitySummaryPng } from './generate-activity-summary.js';
+import { fetchActivitySlides, generateActivityGif } from './generate.js';
 import { startHealthServer } from './health-server.js';
+import { publishActivitySummaryPng } from './upload-activity-summary.js';
 import { publishActivityGif } from './upload.js';
 
 /** 9 AM, midday, 3 PM, 6 PM, 9 PM, midnight (server local time). */
@@ -21,12 +28,25 @@ export async function runActivityScheduledJob() {
 
   try {
     const appConfig = loadConfig();
-    const outputPath = await generateActivityGif(appConfig);
+    const slides = await fetchActivitySlides(appConfig);
+    const outputPath = await generateActivityGif(appConfig, slides);
 
     const gistConfig = loadGistConfig();
     if (gistConfig) {
       console.log('Updating gist…');
       await publishActivityGif(outputPath, gistConfig);
+    }
+
+    const summaryConfig = loadActivitySummaryConfig();
+    const summaryPath = await generateActivitySummaryPng(
+      summaryConfig,
+      slides,
+    );
+
+    const summaryGistConfig = loadActivitySummaryGistConfig();
+    if (summaryGistConfig) {
+      console.log('Updating activity summary gist…');
+      await publishActivitySummaryPng(summaryPath, summaryGistConfig);
     }
 
     console.log(`[${new Date().toISOString()}] Scheduled run finished`);
@@ -42,6 +62,8 @@ export async function runActivityScheduledJob() {
 function main() {
   loadConfig();
   loadGistConfig();
+  loadActivitySummaryConfig();
+  loadActivitySummaryGistConfig();
   startHealthServer();
 
   const timezone = process.env.CRON_TZ?.trim();

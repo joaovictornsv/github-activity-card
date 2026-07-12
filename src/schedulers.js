@@ -1,5 +1,7 @@
 import cron from 'node-cron';
 import {
+  loadActivitySummaryConfig,
+  loadActivitySummaryGistConfig,
   loadConfig,
   loadGistConfig,
   loadStatsConfig,
@@ -29,6 +31,8 @@ function scheduleJob(runJob) {
 function main() {
   loadConfig();
   loadGistConfig();
+  loadActivitySummaryConfig();
+  loadActivitySummaryGistConfig();
   loadStatsConfig();
   loadStatsGistConfig();
   startHealthServer();

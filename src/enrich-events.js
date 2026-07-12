@@ -7,6 +7,12 @@ import { GitHubApiError } from './types.js';
 
 const USER_AGENT = 'github-activity-card/0.1';
 const WHITELIST_SET = new Set(EVENT_WHITELIST);
+const IGNORED_ISSUE_PR_ACTIONS = new Set([
+  'labeled',
+  'unlabeled',
+  'assigned',
+  'unassigned',
+]);
 
 const EMPTY_SLIDE = {
   kind: 'empty',
@@ -25,6 +31,10 @@ function asRecord(value) {
 
 function asString(value) {
   return typeof value === 'string' ? value : undefined;
+}
+
+function asNumber(value) {
+  return typeof value === 'number' ? value : undefined;
 }
 
 function truncate(text, max = 80) {
@@ -77,6 +87,45 @@ async function fetchCommitMessage(repoFullName, sha, config) {
   };
 }
 
+async function fetchPullRequestTitle(repoFullName, number, config) {
+  const parts = parseRepoParts(repoFullName);
+  if (!parts) return '';
+
+  const url = `https://api.github.com/repos/${parts.owner}/${parts.repo}/pulls/${number}`;
+  const data = await githubGet(url, config);
+  return data.title ? truncate(asString(data.title) ?? '') : '';
+}
+
+async function fetchIssueTitle(repoFullName, number, config) {
+  const parts = parseRepoParts(repoFullName);
+  if (!parts) return '';
+
+  const url = `https://api.github.com/repos/${parts.owner}/${parts.repo}/issues/${number}`;
+  const data = await githubGet(url, config);
+  return data.title ? truncate(asString(data.title) ?? '') : '';
+}
+
+export function shouldIncludeActivityEvent(event) {
+  if (!WHITELIST_SET.has(event.type)) {
+    return false;
+  }
+
+  const payload = event.payload ?? {};
+
+  if (event.type === 'CreateEvent' && asString(payload.ref_type) === 'tag') {
+    return false;
+  }
+
+  if (
+    (event.type === 'IssuesEvent' || event.type === 'PullRequestEvent') &&
+    IGNORED_ISSUE_PR_ACTIONS.has(asString(payload.action) ?? '')
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export async function enrichSlide(slide, raw, config) {
   if (slide.kind === 'empty') {
     return slide;
@@ -120,25 +169,31 @@ export async function enrichSlide(slide, raw, config) {
   if (slide.description) return slide;
 
   switch (raw.type) {
-    case 'IssueCommentEvent':
-    case 'PullRequestReviewCommentEvent': {
-      const comment = asRecord(payload.comment);
-      const body = comment ? truncate(asString(comment.body) ?? '') : '';
-      const issue = asRecord(payload.issue);
-      const issueTitle = issue ? asString(issue.title) : undefined;
-
-      return {
-        ...slide,
-        description:
-          body || (issueTitle ? truncate(issueTitle) : slide.description),
-      };
-    }
-
     case 'PullRequestReviewEvent': {
       const pr = asRecord(payload.pull_request);
       const title = pr ? asString(pr.title) : undefined;
       if (!title) return slide;
       return { ...slide, description: truncate(title) };
+    }
+
+    case 'PullRequestEvent': {
+      const pr = asRecord(payload.pull_request);
+      const number = pr ? asNumber(pr.number) : undefined;
+      if (!number) return slide;
+
+      const title = await fetchPullRequestTitle(raw.repo.name, number, config);
+      if (!title) return slide;
+      return { ...slide, description: title };
+    }
+
+    case 'IssuesEvent': {
+      const issue = asRecord(payload.issue);
+      const number = issue ? asNumber(issue.number) : undefined;
+      if (!number) return slide;
+
+      const title = await fetchIssueTitle(raw.repo.name, number, config);
+      if (!title) return slide;
+      return { ...slide, description: title };
     }
 
     default:
@@ -150,7 +205,7 @@ export async function buildSlides(events, config) {
   const slides = [];
 
   for (const event of events) {
-    if (!WHITELIST_SET.has(event.type)) continue;
+    if (!shouldIncludeActivityEvent(event)) continue;
 
     const slide = normalizeEvent(event);
     if (!slide) continue;

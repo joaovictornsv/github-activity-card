@@ -6,8 +6,10 @@
   "main": "src/index.js",
   "scripts": {
     "generate": "node src/index.js",
+    "generate:activity-summary": "node src/activity-summary-index.js",
     "generate:stats": "node src/stats-index.js",
     "upload": "node src/upload.js",
+    "upload:activity-summary": "node src/upload-activity-summary.js",
     "upload:stats": "node src/upload-stats.js",
     "scheduler": "node src/scheduler.js",
     "scheduler:stats": "node src/stats-scheduler.js",

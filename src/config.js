@@ -12,9 +12,6 @@ export const EVENT_WHITELIST = [
   'PullRequestEvent',
   'IssuesEvent',
   'PullRequestReviewEvent',
-  'IssueCommentEvent',
-  'PullRequestReviewCommentEvent',
-  'ReleaseEvent',
   'CreateEvent',
 ];
 
@@ -24,6 +21,10 @@ export function activityGifFilename(username) {
 
 export function statsPngFilename(username) {
   return `${username}-stats.png`;
+}
+
+export function activitySummaryPngFilename(username) {
+  return `${username}-activity-summary.png`;
 }
 
 export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'];
@@ -174,6 +175,50 @@ export function loadStatsConfig() {
     ...loadSharedRenderConfig(),
     statsTimezone: process.env.CRON_TZ?.trim() || undefined,
   };
+}
+
+export function loadActivitySummaryConfig() {
+  const base = loadConfig();
+
+  return {
+    ...base,
+    outputPath: path.resolve(
+      projectRoot,
+      process.env.ACTIVITY_SUMMARY_OUTPUT_PATH?.trim() ||
+        path.join('output', activitySummaryPngFilename(base.username)),
+    ),
+    activitySummaryTimezone: process.env.CRON_TZ?.trim() || undefined,
+  };
+}
+
+/**
+ * When `ACTIVITY_SUMMARY_GIST_ID` or `GIST_ID` is set, publish replaces that
+ * file in the gist (requires `gist` PAT scope).
+ */
+export function loadActivitySummaryGistConfig() {
+  const gistId =
+    process.env.ACTIVITY_SUMMARY_GIST_ID?.trim() ||
+    process.env.GIST_ID?.trim();
+  if (!gistId) {
+    return null;
+  }
+
+  const token = process.env.GITHUB_TOKEN?.trim();
+  if (!token) {
+    throw new Error(
+      'Activity summary gist update: ACTIVITY_SUMMARY_GIST_ID or GIST_ID is set ' +
+        'but GITHUB_TOKEN is missing. Use a fine-grained or classic PAT with the gist scope.',
+    );
+  }
+
+  const filename =
+    process.env.ACTIVITY_SUMMARY_GIST_FILENAME?.trim() ||
+    'activity-summary.png';
+  if (!filename) {
+    throw new Error('Invalid ACTIVITY_SUMMARY_GIST_FILENAME: must not be empty');
+  }
+
+  return { gistId, token, filename };
 }
 
 /** When `STATS_GIST_ID` is set, publish replaces that file in the gist (requires `gist` PAT scope). */

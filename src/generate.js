@@ -6,6 +6,12 @@ import { fetchPublicEvents } from './fetch-events.js';
 import { buildSlides } from './enrich-events.js';
 import { cleanupTempDir, renderSlides } from './render-slides.js';
 
+export async function fetchActivitySlides(config) {
+  console.log(`Fetching public events for ${config.username}…`);
+  const events = await fetchPublicEvents(config);
+  return buildSlides(events, config);
+}
+
 async function writeGifAtomically(tempGifPath, outputPath) {
   const outputDir = path.dirname(outputPath);
   await fs.mkdir(outputDir, { recursive: true });
@@ -15,10 +21,11 @@ async function writeGifAtomically(tempGifPath, outputPath) {
   await fs.rename(tempOutput, outputPath);
 }
 
-export async function generateActivityGif(config = loadConfig()) {
-  console.log(`Fetching public events for ${config.username}…`);
-  const events = await fetchPublicEvents(config);
-  const slides = await buildSlides(events, config);
+export async function generateActivityGif(
+  config = loadConfig(),
+  preloadedSlides,
+) {
+  const slides = preloadedSlides ?? (await fetchActivitySlides(config));
 
   console.log(`Rendering ${slides.length} slide(s)…`);
   const { pngPaths, tempDir } = await renderSlides(slides, config);

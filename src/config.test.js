@@ -1,8 +1,10 @@
 import { afterAll, beforeEach, describe, expect, it } from '@jest/globals';
 import {
   activityGifFilename,
+  activitySummaryPngFilename,
   assertRequiredEnvVars,
   ConfigValidationError,
+  loadActivitySummaryGistConfig,
   loadGistConfig,
   loadStatsGistConfig,
   statsPngFilename,
@@ -17,6 +19,14 @@ describe('activityGifFilename', () => {
 describe('statsPngFilename', () => {
   it('builds the default stats output filename from username', () => {
     expect(statsPngFilename('octocat')).toBe('octocat-stats.png');
+  });
+});
+
+describe('activitySummaryPngFilename', () => {
+  it('builds the default activity summary output filename from username', () => {
+    expect(activitySummaryPngFilename('octocat')).toBe(
+      'octocat-activity-summary.png',
+    );
   });
 });
 
@@ -138,5 +148,57 @@ describe('loadStatsGistConfig', () => {
     delete process.env.GITHUB_TOKEN;
 
     expect(() => loadStatsGistConfig()).toThrow(/GITHUB_TOKEN is missing/);
+  });
+});
+
+describe('loadActivitySummaryGistConfig', () => {
+  const original = process.env;
+
+  beforeEach(() => {
+    process.env = { ...original };
+  });
+
+  afterAll(() => {
+    process.env = original;
+  });
+
+  it('returns null when neither gist id env var is set', () => {
+    delete process.env.ACTIVITY_SUMMARY_GIST_ID;
+    delete process.env.GIST_ID;
+    expect(loadActivitySummaryGistConfig()).toBeNull();
+  });
+
+  it('falls back to GIST_ID when ACTIVITY_SUMMARY_GIST_ID is unset', () => {
+    delete process.env.ACTIVITY_SUMMARY_GIST_ID;
+    process.env.GIST_ID = 'abc123';
+    process.env.GITHUB_TOKEN = 'ghp_test';
+
+    expect(loadActivitySummaryGistConfig()).toEqual({
+      gistId: 'abc123',
+      token: 'ghp_test',
+      filename: 'activity-summary.png',
+    });
+  });
+
+  it('prefers ACTIVITY_SUMMARY_GIST_ID when both gist ids are set', () => {
+    process.env.ACTIVITY_SUMMARY_GIST_ID = 'summary123';
+    process.env.GIST_ID = 'abc123';
+    process.env.GITHUB_TOKEN = 'ghp_test';
+    process.env.ACTIVITY_SUMMARY_GIST_FILENAME = 'activity.png';
+
+    expect(loadActivitySummaryGistConfig()).toEqual({
+      gistId: 'summary123',
+      token: 'ghp_test',
+      filename: 'activity.png',
+    });
+  });
+
+  it('throws when a gist id is set without GITHUB_TOKEN', () => {
+    process.env.GIST_ID = 'abc123';
+    delete process.env.GITHUB_TOKEN;
+
+    expect(() => loadActivitySummaryGistConfig()).toThrow(
+      /GITHUB_TOKEN is missing/,
+    );
   });
 });
