@@ -1,6 +1,6 @@
 import { formatStatsDate } from './build-stats-card.js';
 
-export const ACTIVITY_SUMMARY_MAX_ITEMS = 5;
+export const ACTIVITY_SUMMARY_MAX_ITEMS = 4;
 export const ACTIVITY_SUMMARY_TITLE = 'Last activity';
 
 function summaryText(slide) {

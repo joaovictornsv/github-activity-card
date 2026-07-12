@@ -83,12 +83,6 @@ describe('buildActivitySummaryCard', () => {
       icon: 'issue',
       iconColor: ACTIVITY_COLORS.green,
     });
-    expect(card.items[4]).toEqual({
-      kind: 'activity',
-      text: 'Cleanup',
-      icon: 'issue',
-      iconColor: ACTIVITY_COLORS.purple,
-    });
   });
 
   it('skips activity rows without description text', () => {

@@ -68,7 +68,7 @@ npm run generate:activity-summary
 npm run generate:activity-summary -- --dry-fetch
 ```
 
-Lists up to **5** recent public activities in one image (icon + description per row), with a **Last activity** header and updated timestamp. Uses the same card size as the stats card (`CARD_WIDTH` × `CARD_HEIGHT`).
+Lists up to **4** recent public activities in one image (icon + description per row), with a **Last activity** header and updated timestamp. Uses the same card size as the stats card (`CARD_WIDTH` × `CARD_HEIGHT`).
 
 Publish to gist (reuses `GIST_ID` when `ACTIVITY_SUMMARY_GIST_ID` is unset):
 
@@ -197,7 +197,7 @@ Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
 ### Activity summary
 
 - Same event fetch and whitelist as the GIF slideshow
-- Single static PNG with up to **5** icon + description rows at the standard card size
+- Single static PNG with up to **4** icon + description rows at the standard card size
 - Same failure semantics as activity (does not overwrite existing file on error)
 - Generated alongside the GIF when using `npm run scheduler`
 
