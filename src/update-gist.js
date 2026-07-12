@@ -75,7 +75,7 @@ async function fetchGistHtmlUrl(gistId, token) {
  * Updates a gist binary file by pushing to the gist's git repository.
  * The Gist REST `files[].content` field is plain text only (base64 is stored literally).
  */
-export async function updateGistActivityGif(filePath, config) {
+export async function updateGistFile(filePath, config) {
   await assertGitAvailable();
 
   const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'gist-upload-'));

@@ -33,44 +33,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
   width: var(--card-width);
   height: var(--card-height);
-  padding: 0px 14px 10px 14px;
   background: #0d1117;
   border: 1px solid #30363d;
   border-radius: 8px;
-}
-
-.slide-dots {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.slide-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #30363d;
-}
-
-.slide-dot.is-active {
-  width: 7px;
-  height: 7px;
-  background: #8b949e;
-}
-
-.row-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  line-height: 1.2;
 }
 
 .icon-wrap {
@@ -94,50 +61,6 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-}
-
-.action {
-  font-size: 14px;
-  font-weight: 500;
-  color: #8b949e;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.description {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.35;
-  color: #e6edf3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.card[data-kind='empty'] .repo {
-  display: none;
-}
-
-.card[data-kind='empty'] .action {
-  font-size: 14px;
-  font-weight: 600;
-  color: #e6edf3;
-}
-
-.card[data-kind='empty'] .description {
-  font-size: 16px;
-  color: #8b949e;
-}
-
-.card.no-description .description {
-  display: none;
-}
-
-.activity-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
 }
 
 .stats-card {

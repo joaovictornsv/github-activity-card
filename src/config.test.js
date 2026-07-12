@@ -1,20 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it } from '@jest/globals';
 import {
-  activityGifFilename,
   activitySummaryPngFilename,
   assertRequiredEnvVars,
   ConfigValidationError,
   loadActivitySummaryGistConfig,
-  loadGistConfig,
   loadStatsGistConfig,
   statsPngFilename,
 } from './config.js';
-
-describe('activityGifFilename', () => {
-  it('builds the default output filename from username', () => {
-    expect(activityGifFilename('octocat')).toBe('octocat-activity.gif');
-  });
-});
 
 describe('statsPngFilename', () => {
   it('builds the default stats output filename from username', () => {
@@ -76,42 +68,6 @@ describe('assertRequiredEnvVars', () => {
         'test context',
       ),
     ).not.toThrow();
-  });
-});
-
-describe('loadGistConfig', () => {
-  const original = process.env;
-
-  beforeEach(() => {
-    process.env = { ...original };
-  });
-
-  afterAll(() => {
-    process.env = original;
-  });
-
-  it('returns null when GIST_ID is unset', () => {
-    delete process.env.GIST_ID;
-    expect(loadGistConfig()).toBeNull();
-  });
-
-  it('returns gist config when GIST_ID and token are set', () => {
-    process.env.GIST_ID = 'abc123';
-    process.env.GITHUB_TOKEN = 'ghp_test';
-    process.env.GIST_FILENAME = 'custom.gif';
-
-    expect(loadGistConfig()).toEqual({
-      gistId: 'abc123',
-      token: 'ghp_test',
-      filename: 'custom.gif',
-    });
-  });
-
-  it('throws when GIST_ID is set without GITHUB_TOKEN', () => {
-    process.env.GIST_ID = 'abc123';
-    delete process.env.GITHUB_TOKEN;
-
-    expect(() => loadGistConfig()).toThrow(/GITHUB_TOKEN is missing/);
   });
 });
 

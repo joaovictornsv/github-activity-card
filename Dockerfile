@@ -6,9 +6,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# GIF encoding (not included in the Playwright base image)
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg git \
+  && apt-get install -y --no-install-recommends git \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
@@ -19,6 +18,6 @@ COPY templates ./templates
 
 RUN mkdir -p output
 
-# Long-running schedulers: activity + stats GIFs on cron, optionally publish to gists.
-# Override CMD for one-off runs, e.g. ["node", "src/index.js"] or ["node", "src/upload.js", "output/your-username-activity.gif"]
+# Long-running schedulers: activity summary + stats PNGs on cron, optionally publish to gists.
+# Override CMD for one-off runs, e.g. ["node", "src/activity-summary-index.js"]
 CMD ["node", "src/schedulers.js"]

@@ -1,14 +1,14 @@
 {
   "name": "github-activity-card",
   "version": "0.1.0",
-  "description": "Daily-updated GIF slideshow of your last public GitHub activities",
+  "description": "Daily-updated PNG cards for your GitHub activity and stats, for README embedding",
   "type": "module",
-  "main": "src/index.js",
+  "main": "src/activity-summary-index.js",
   "scripts": {
-    "generate": "node src/index.js",
+    "generate": "node src/activity-summary-index.js",
     "generate:activity-summary": "node src/activity-summary-index.js",
     "generate:stats": "node src/stats-index.js",
-    "upload": "node src/upload.js",
+    "upload": "node src/upload-activity-summary.js",
     "upload:activity-summary": "node src/upload-activity-summary.js",
     "upload:stats": "node src/upload-stats.js",
     "scheduler": "node src/scheduler.js",
@@ -25,7 +25,7 @@
   "keywords": [
     "github",
     "activity",
-    "gif",
+    "png",
     "readme"
   ],
   "license": "MIT",

@@ -1,17 +1,12 @@
 # GitHub Activity Card
 
-A daily-updated GIF slideshow of your last public GitHub activities, for README embedding.
+Daily-updated PNG cards for your GitHub profile README: an **activity summary** of recent public events and an **all-time stats** card.
 
-A companion **stats card** shows all-time totals (commits, merged PRs, closed assigned issues) in a single static image using the same card UI.
-
-An **activity summary** card lists your last public activities in one static PNG (same data as the GIF slideshow).
-
-Generate locally with `npm run generate` (activity GIF), `npm run generate:activity-summary` (activity summary PNG), or `npm run generate:stats` (stats), or run a scheduler to refresh on a fixed cadence and optionally publish to a GitHub gist.
+Generate locally with `npm run generate` (activity summary PNG), `npm run generate:stats` (stats PNG), or run a scheduler to refresh on a fixed cadence and optionally publish to GitHub gists.
 
 ## Requirements
 
 - **Node.js** 20+
-- **ffmpeg** on `PATH` (GIF encoding)
 - **Playwright** Chromium (installed via npm)
 - **git** on `PATH` (gist publish only)
 
@@ -21,7 +16,7 @@ Generate locally with `npm run generate` (activity GIF), `npm run generate:activ
 npm install
 npx playwright install chromium
 cp .env.example .env
-# Edit .env: GITHUB_USERNAME, GITHUB_TOKEN, and GIST_ID / STATS_GIST_ID if publishing
+# Edit .env: GITHUB_USERNAME, GITHUB_TOKEN, and gist IDs if publishing
 ```
 
 ### GitHub token (one token for both crons)
@@ -32,7 +27,7 @@ Create **one** classic personal access token with these scopes:
 
 | Scope | Used for |
 |-------|----------|
-| **`gist`** | Publish activity + stats GIFs to gists |
+| **`gist`** | Publish activity summary + stats PNGs to gists |
 | **`read:user`** | Stats: private commits & PR reviews in the contribution graph |
 | **`repo`** | Stats: private merged PRs & closed issues in search; higher API rate limits for activity |
 
@@ -48,58 +43,24 @@ npm run check:token
 
 ## Usage
 
-### Local generation (no cloud)
-
-```bash
-# Full pipeline: fetch → render → encode → output/{GITHUB_USERNAME}-activity.gif
-npm run generate
-
-# Fetch + normalize only (prints slide JSON, no GIF)
-npm run generate -- --dry-fetch
-```
-
-### Activity summary (single PNG)
+### Activity summary (recent public activity)
 
 ```bash
 # Full pipeline: fetch → render → output/{GITHUB_USERNAME}-activity-summary.png
-npm run generate:activity-summary
+npm run generate
 
 # Fetch only (prints slides + card JSON, no PNG)
-npm run generate:activity-summary -- --dry-fetch
+npm run generate -- --dry-fetch
 ```
 
-Lists up to **4** recent public activities in one image (icon + description per row), with a **Last activity** header and updated timestamp. Uses the same card size as the stats card (`CARD_WIDTH` × `CARD_HEIGHT`).
+Lists up to **4** recent public activities in one image (icon + description per row), with a **Last activity** header and updated timestamp.
 
-Publish to gist (reuses `GIST_ID` when `ACTIVITY_SUMMARY_GIST_ID` is unset):
-
-```bash
-npm run generate:activity-summary
-npm run upload:activity-summary
-```
-
-The activity scheduler also generates and publishes the summary PNG when `GIST_ID` or `ACTIVITY_SUMMARY_GIST_ID` is set.
-
-### Publish to gist
-
-Uploads an existing GIF (default: `output/{GITHUB_USERNAME}-activity.gif`) to a GitHub gist. Requires `GIST_ID` and `GITHUB_TOKEN`. Does not fetch or render.
+Publish to gist (requires `ACTIVITY_SUMMARY_GIST_ID` or `GIST_ID`):
 
 ```bash
-npm run generate   # if you need a fresh file first
+npm run generate
 npm run upload
-
-# Or publish a specific path
-npm run upload -- path/to/activity.gif
 ```
-
-### Scheduler (generate + optional gist)
-
-Long-running process: runs the full pipeline six times per day at **9:00, 12:00, 15:00, 18:00, 21:00, and 00:00** (server local time unless `CRON_TZ` is set). When `GIST_ID` is set, also updates the gist after each run.
-
-```bash
-npm run scheduler
-```
-
-Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (useful for testing).
 
 ### Stats card (all-time totals)
 
@@ -129,33 +90,32 @@ npm run upload:stats
 npm run scheduler:stats
 ```
 
-The stats scheduler is a **separate process** from the activity scheduler when run locally (`npm run scheduler` vs `npm run scheduler:stats`). The Docker image runs **both** via `src/schedulers.js` (`npm run schedulers`).
+### Scheduler (generate + optional gist)
 
-Stats gist embed:
+Long-running process: runs the full pipeline six times per day at **9:00, 12:00, 15:00, 18:00, 21:00, and 00:00** (server local time unless `CRON_TZ` is set). When gist IDs are set, also updates gists after each run.
 
-```markdown
-![GitHub stats](https://gist.githubusercontent.com/your-username/STATS_GIST_ID/raw/stats.png)
+```bash
+npm run scheduler          # activity summary PNG
+npm run scheduler:stats    # stats PNG
+npm run schedulers         # both (Docker default)
 ```
+
+Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (useful for testing).
 
 ## Configuration
 
 | Variable | Required | Default | Used by |
 |----------|----------|---------|---------|
-| `GITHUB_USERNAME` | Yes | — | generate, scheduler, generate:stats, scheduler:stats |
-| `GITHUB_TOKEN` | Yes | — | all generators; required when `GIST_ID` or `STATS_GIST_ID` is set |
-| `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
-| `ACTIVITY_SUMMARY_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity-summary.png` | generate:activity-summary, upload:activity-summary |
+| `GITHUB_USERNAME` | Yes | — | all generators |
+| `GITHUB_TOKEN` | Yes | — | all generators; required when gist IDs are set |
+| `ACTIVITY_SUMMARY_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity-summary.png` | generate, upload |
 | `STATS_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-stats.png` | generate:stats, upload:stats |
-| `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `450` | generate, generate:stats |
 | `CARD_HEIGHT` | No | `124` | generate, generate:stats |
-| `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale; activity GIF encodes at `CARD_WIDTH ×` this) |
-| `GIF_MAX_COLORS` | No | `256` | generate (ffmpeg palette size, 2–256) |
-| `GIF_BAYER_SCALE` | No | `2` | generate (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
-| `GIST_ID` | For upload | — | upload, scheduler (when set, updates gist after generate) |
-| `GIST_FILENAME` | No | `activity.gif` | upload, scheduler |
-| `ACTIVITY_SUMMARY_GIST_ID` | For upload:activity-summary | falls back to `GIST_ID` | upload:activity-summary, scheduler |
-| `ACTIVITY_SUMMARY_GIST_FILENAME` | No | `activity-summary.png` | upload:activity-summary, scheduler |
+| `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale) |
+| `GIST_ID` | For upload | — | upload, scheduler (activity summary gist fallback) |
+| `ACTIVITY_SUMMARY_GIST_ID` | For upload | falls back to `GIST_ID` | upload, scheduler |
+| `ACTIVITY_SUMMARY_GIST_FILENAME` | No | `activity-summary.png` | upload, scheduler |
 | `STATS_GIST_ID` | For upload:stats | — | upload:stats, scheduler:stats |
 | `STATS_GIST_FILENAME` | No | `stats.png` | upload:stats, scheduler:stats |
 | `CRON_TZ` | No | server local | scheduler, scheduler:stats |
@@ -163,61 +123,62 @@ Stats gist embed:
 
 ### Gist publish
 
-Binary GIFs are pushed via **git** (the Gist REST `content` field is text-only and cannot store images).
+Binary PNGs are pushed via **git** (the Gist REST `content` field is text-only and cannot store images).
 
-1. Create a **secret** gist with a single file `activity.gif` (any placeholder content).
+**Activity summary:**
+
+1. Create a **secret** gist with a single file `activity-summary.png` (any placeholder content).
 2. Copy the gist ID from the URL (`https://gist.github.com/you/<gist-id>`).
-3. Set `GIST_ID` and ensure `GITHUB_TOKEN` has the [required scopes](#github-token-one-token-for-both-crons).
-4. Optional: `GIST_FILENAME` if your gist file is not named `activity.gif`.
+3. Set `GIST_ID` or `ACTIVITY_SUMMARY_GIST_ID` and ensure `GITHUB_TOKEN` has the [required scopes](#github-token-one-token-for-both-crons).
+4. Optional: `ACTIVITY_SUMMARY_GIST_FILENAME` if your gist file is not named `activity-summary.png`.
 
 Embed:
 
 ```markdown
-![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/activity.gif)
+![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/activity-summary.png)
 ```
 
-GitHub may cache raw gist URLs briefly.
-
-### Stats gist publish
-
-Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
+**Stats:**
 
 1. Create a **secret** gist with a single file `stats.png`.
 2. Set `STATS_GIST_ID` (and `STATS_GIST_FILENAME` if needed).
 
+Embed:
+
+```markdown
+![GitHub stats](https://gist.githubusercontent.com/your-username/STATS_GIST_ID/raw/stats.png)
+```
+
+GitHub may cache raw gist URLs briefly.
+
 ## Behavior
+
+### Activity summary
 
 - Fetches [`/users/{username}/events/public`](https://docs.github.com/en/rest/activity/events#list-public-events-for-a-user)
 - Whitelists activity types (push, PR, issues, reviews, branch creates)
 - Ignores comments, label/assignment changes, releases/tags, and tag creates
-- Up to **5** slides; **empty state** if none match
-- On API/render/encode failure: logs error, exits non-zero, **does not overwrite** an existing local GIF
+- Single static PNG with up to **4** icon + description rows
+- On API/render failure: logs error, exits non-zero, **does not overwrite** an existing local PNG
 - Scheduler catches errors per run so the process keeps running; failed runs do not publish
-
-### Activity summary
-
-- Same event fetch and whitelist as the GIF slideshow
-- Single static PNG with up to **4** icon + description rows at the standard card size
-- Same failure semantics as activity (does not overwrite existing file on error)
-- Generated alongside the GIF when using `npm run scheduler`
 
 ### Stats card
 
 - Commits: GraphQL contribution graph summed across all years (includes private activity with `read:user` + profile setting)
 - Merged PRs and closed assigned issues: authenticated Search API (`per_page=1`, includes accessible private repos)
-- Single static PNG; same failure semantics as activity (does not overwrite existing file on error)
+- Single static PNG; same failure semantics as activity summary
 
 ## Scripts
 
 | Script | Description |
 |--------|-------------|
-| `npm run generate` | Local activity GIF only |
-| `npm run generate:activity-summary` | Local activity summary PNG only |
-| `npm run generate:stats` | Local stats card only |
-| `npm run upload` | Push activity GIF to gist (`GIST_ID` required) |
-| `npm run upload:activity-summary` | Push activity summary PNG to gist |
+| `npm run generate` | Local activity summary PNG |
+| `npm run generate:activity-summary` | Same as `generate` |
+| `npm run generate:stats` | Local stats card PNG |
+| `npm run upload` | Push activity summary PNG to gist |
+| `npm run upload:activity-summary` | Same as `upload` |
 | `npm run upload:stats` | Push stats PNG to gist (`STATS_GIST_ID` required) |
-| `npm run scheduler` | Activity cron + GIF + summary PNG + optional gist |
+| `npm run scheduler` | Activity summary cron + optional gist |
 | `npm run scheduler:stats` | Stats cron + generate + optional gist |
 | `npm run schedulers` | Both crons in one process (Docker default) |
 | `npm run check:token` | Verify `GITHUB_TOKEN` scopes for both crons |

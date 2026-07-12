@@ -2,8 +2,6 @@ import cron from 'node-cron';
 import {
   loadActivitySummaryConfig,
   loadActivitySummaryGistConfig,
-  loadConfig,
-  loadGistConfig,
   loadStatsConfig,
   loadStatsGistConfig,
 } from './config.js';
@@ -29,8 +27,6 @@ function scheduleJob(runJob) {
 }
 
 function main() {
-  loadConfig();
-  loadGistConfig();
   loadActivitySummaryConfig();
   loadActivitySummaryGistConfig();
   loadStatsConfig();

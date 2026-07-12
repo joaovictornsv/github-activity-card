@@ -2,10 +2,10 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadStatsConfig, loadStatsGistConfig } from './config.js';
-import { updateGistActivityGif } from './update-gist.js';
+import { updateGistFile } from './update-gist.js';
 
 export async function publishStatsPng(filePath, gistConfig) {
-  await updateGistActivityGif(filePath, gistConfig);
+  await updateGistFile(filePath, gistConfig);
 }
 
 async function main() {

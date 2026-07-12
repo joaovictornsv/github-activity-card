@@ -3,14 +3,11 @@ import { fileURLToPath } from 'node:url';
 import {
   loadActivitySummaryConfig,
   loadActivitySummaryGistConfig,
-  loadConfig,
-  loadGistConfig,
 } from './config.js';
 import { generateActivitySummaryPng } from './generate-activity-summary.js';
-import { fetchActivitySlides, generateActivityGif } from './generate.js';
+import { fetchActivitySlides } from './generate.js';
 import { startHealthServer } from './health-server.js';
 import { publishActivitySummaryPng } from './upload-activity-summary.js';
-import { publishActivityGif } from './upload.js';
 
 /** 9 AM, midday, 3 PM, 6 PM, 9 PM, midnight (server local time). */
 export const GENERATION_CRON_EXPRESSIONS = [
@@ -27,17 +24,8 @@ export async function runActivityScheduledJob() {
   console.log(`[${startedAt}] Scheduled run started`);
 
   try {
-    const appConfig = loadConfig();
-    const slides = await fetchActivitySlides(appConfig);
-    const outputPath = await generateActivityGif(appConfig, slides);
-
-    const gistConfig = loadGistConfig();
-    if (gistConfig) {
-      console.log('Updating gist…');
-      await publishActivityGif(outputPath, gistConfig);
-    }
-
     const summaryConfig = loadActivitySummaryConfig();
+    const slides = await fetchActivitySlides(summaryConfig);
     const summaryPath = await generateActivitySummaryPng(
       summaryConfig,
       slides,
@@ -54,14 +42,12 @@ export async function runActivityScheduledJob() {
     const message = error instanceof Error ? error.message : String(error);
     console.error(`[${new Date().toISOString()}] Scheduled run failed: ${message}`);
     console.error(
-      'Local output GIF was left unchanged on failure.',
+      'Local output PNG was left unchanged on failure.',
     );
   }
 }
 
 function main() {
-  loadConfig();
-  loadGistConfig();
   loadActivitySummaryConfig();
   loadActivitySummaryGistConfig();
   startHealthServer();

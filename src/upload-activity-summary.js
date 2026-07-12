@@ -5,10 +5,10 @@ import {
   loadActivitySummaryConfig,
   loadActivitySummaryGistConfig,
 } from './config.js';
-import { updateGistActivityGif } from './update-gist.js';
+import { updateGistFile } from './update-gist.js';
 
 export async function publishActivitySummaryPng(filePath, gistConfig) {
-  await updateGistActivityGif(filePath, gistConfig);
+  await updateGistFile(filePath, gistConfig);
 }
 
 async function main() {
@@ -16,7 +16,7 @@ async function main() {
   const gistConfig = loadActivitySummaryGistConfig();
   if (!gistConfig) {
     throw new Error(
-      'ACTIVITY_SUMMARY_GIST_ID or GIST_ID is required for npm run upload:activity-summary. ' +
+      'ACTIVITY_SUMMARY_GIST_ID or GIST_ID is required for npm run upload. ' +
         'Set one of them and GITHUB_TOKEN in .env.',
     );
   }
@@ -29,7 +29,7 @@ async function main() {
     await fs.access(filePath);
   } catch {
     throw new Error(
-      `PNG not found: ${filePath}. Run npm run generate:activity-summary first.`,
+      `PNG not found: ${filePath}. Run npm run generate first.`,
     );
   }
 
