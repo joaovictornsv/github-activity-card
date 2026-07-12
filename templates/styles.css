@@ -133,3 +133,76 @@ body {
 .card.no-description .description {
   display: none;
 }
+
+.activity-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stats-layout {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+  min-height: 0;
+}
+
+.card[data-kind='stats'] {
+  justify-content: flex-start;
+  padding: 10px 14px;
+  gap: 0;
+}
+
+.card[data-kind='stats'] .activity-layout {
+  display: none;
+}
+
+.card[data-kind='stats'] .stats-layout {
+  display: flex;
+}
+
+.stats-username {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.stats-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+  gap: 12px;
+}
+
+.stats-main {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.stats-count {
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1;
+  color: #e6edf3;
+  flex-shrink: 0;
+}
+
+.stats-label {
+  font-size: 20px;
+  min-width: 0;
+}
+
+.stats-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.stats-icon .octicon {
+  width: 30px;
+  height: 30px;
+}

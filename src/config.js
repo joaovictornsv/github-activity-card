@@ -22,6 +22,10 @@ export function activityGifFilename(username) {
   return `${username}-activity.gif`;
 }
 
+export function statsGifFilename(username) {
+  return `${username}-stats.gif`;
+}
+
 export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'];
 
 export class ConfigValidationError extends Error {
@@ -100,30 +104,8 @@ export function loadConfig() {
       process.env.OUTPUT_PATH?.trim() ||
         path.join('output', activityGifFilename(env.GITHUB_USERNAME)),
     ),
-    slideDurationSec: parsePositiveFloat(
-      process.env.SLIDE_DURATION_SEC,
-      3,
-    ),
-    cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 470),
-    cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 124),
-    deviceScaleFactor: parsePositiveInt(process.env.DEVICE_SCALE_FACTOR, 2),
-    gifMaxColors: parseIntInRange(
-      process.env.GIF_MAX_COLORS,
-      256,
-      2,
-      256,
-      'GIF_MAX_COLORS',
-    ),
-    gifBayerScale: parseIntInRange(
-      process.env.GIF_BAYER_SCALE,
-      2,
-      0,
-      5,
-      'GIF_BAYER_SCALE',
-    ),
+    ...loadSharedRenderConfig(),
     maxSlides: 5,
-    templatesDir: path.join(projectRoot, 'templates'),
-    projectRoot,
   };
 }
 
@@ -145,6 +127,72 @@ export function loadGistConfig() {
   const filename = process.env.GIST_FILENAME?.trim() || 'activity.gif';
   if (!filename) {
     throw new Error('Invalid GIST_FILENAME: must not be empty');
+  }
+
+  return { gistId, token, filename };
+}
+
+function loadSharedRenderConfig() {
+  return {
+    slideDurationSec: parsePositiveFloat(
+      process.env.SLIDE_DURATION_SEC,
+      3,
+    ),
+    cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 470),
+    cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 124),
+    deviceScaleFactor: parsePositiveInt(process.env.DEVICE_SCALE_FACTOR, 2),
+    gifMaxColors: parseIntInRange(
+      process.env.GIF_MAX_COLORS,
+      256,
+      2,
+      256,
+      'GIF_MAX_COLORS',
+    ),
+    gifBayerScale: parseIntInRange(
+      process.env.GIF_BAYER_SCALE,
+      2,
+      0,
+      5,
+      'GIF_BAYER_SCALE',
+    ),
+    templatesDir: path.join(projectRoot, 'templates'),
+    projectRoot,
+  };
+}
+
+export function loadStatsConfig() {
+  const env = requireEnvVars(APP_REQUIRED_ENV_VARS, 'GitHub stats card');
+
+  return {
+    username: env.GITHUB_USERNAME,
+    token: process.env.GITHUB_TOKEN?.trim() || undefined,
+    outputPath: path.resolve(
+      projectRoot,
+      process.env.STATS_OUTPUT_PATH?.trim() ||
+        path.join('output', statsGifFilename(env.GITHUB_USERNAME)),
+    ),
+    ...loadSharedRenderConfig(),
+  };
+}
+
+/** When `STATS_GIST_ID` is set, publish replaces that file in the gist (requires `gist` PAT scope). */
+export function loadStatsGistConfig() {
+  const gistId = process.env.STATS_GIST_ID?.trim();
+  if (!gistId) {
+    return null;
+  }
+
+  const token = process.env.GITHUB_TOKEN?.trim();
+  if (!token) {
+    throw new Error(
+      'Stats gist update: STATS_GIST_ID is set but GITHUB_TOKEN is missing. ' +
+        'Use a fine-grained or classic PAT with the gist scope.',
+    );
+  }
+
+  const filename = process.env.STATS_GIST_FILENAME?.trim() || 'stats.gif';
+  if (!filename) {
+    throw new Error('Invalid STATS_GIST_FILENAME: must not be empty');
   }
 
   return { gistId, token, filename };
