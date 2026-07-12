@@ -5,7 +5,7 @@ import {
   ConfigValidationError,
   loadGistConfig,
   loadStatsGistConfig,
-  statsGifFilename,
+  statsPngFilename,
 } from './config.js';
 
 describe('activityGifFilename', () => {
@@ -14,9 +14,9 @@ describe('activityGifFilename', () => {
   });
 });
 
-describe('statsGifFilename', () => {
+describe('statsPngFilename', () => {
   it('builds the default stats output filename from username', () => {
-    expect(statsGifFilename('octocat')).toBe('octocat-stats.gif');
+    expect(statsPngFilename('octocat')).toBe('octocat-stats.png');
   });
 });
 
@@ -124,12 +124,12 @@ describe('loadStatsGistConfig', () => {
   it('returns stats gist config when STATS_GIST_ID and token are set', () => {
     process.env.STATS_GIST_ID = 'stats123';
     process.env.GITHUB_TOKEN = 'ghp_test';
-    process.env.STATS_GIST_FILENAME = 'custom-stats.gif';
+    process.env.STATS_GIST_FILENAME = 'custom-stats.png';
 
     expect(loadStatsGistConfig()).toEqual({
       gistId: 'stats123',
       token: 'ghp_test',
-      filename: 'custom-stats.gif',
+      filename: 'custom-stats.png',
     });
   });
 

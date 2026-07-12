@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { loadStatsConfig, loadStatsGistConfig } from './config.js';
 import { updateGistActivityGif } from './update-gist.js';
 
-export async function publishStatsGif(filePath, gistConfig) {
+export async function publishStatsPng(filePath, gistConfig) {
   await updateGistActivityGif(filePath, gistConfig);
 }
 
@@ -25,12 +25,12 @@ async function main() {
     await fs.access(filePath);
   } catch {
     throw new Error(
-      `GIF not found: ${filePath}. Run npm run generate:stats first.`,
+      `PNG not found: ${filePath}. Run npm run generate:stats first.`,
     );
   }
 
   console.log(`Publishing ${filePath} to gist…`);
-  await publishStatsGif(filePath, gistConfig);
+  await publishStatsPng(filePath, gistConfig);
 }
 
 const isMain = process.argv[1] === fileURLToPath(import.meta.url);

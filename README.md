@@ -2,7 +2,7 @@
 
 A daily-updated GIF slideshow of your last public GitHub activities, for README embedding.
 
-A companion **stats GIF** shows all-time totals (commits, merged PRs, reviewed PRs, closed issues, opened issues) using the same card UI.
+A companion **stats card** shows all-time totals (commits, merged PRs, closed assigned issues) in a single static image using the same card UI.
 
 Generate locally with `npm run generate` (activity) or `npm run generate:stats` (stats), or run a scheduler to refresh on a fixed cadence and optionally publish to a GitHub gist.
 
@@ -78,25 +78,23 @@ npm run scheduler
 
 Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (useful for testing).
 
-### Stats GIF (all-time totals)
+### Stats card (all-time totals)
 
 ```bash
-# Full pipeline: fetch → render → encode → output/{GITHUB_USERNAME}-stats.gif
+# Full pipeline: fetch → render → output/{GITHUB_USERNAME}-stats.png
 npm run generate:stats
 
-# Fetch only (prints stats + slide JSON, no GIF)
+# Fetch only (prints stats + card JSON, no PNG)
 npm run generate:stats -- --dry-fetch
 ```
 
-Stats shown (all-time, in slide order):
+Stats shown (all-time, left to right):
 
 1. Commits
 2. Merged PRs
-3. Reviewed PRs
-4. Closed issues (assigned)
-5. Opened issues
+3. Closed issues (assigned to you)
 
-Commits, reviewed PRs, and opened issues are fetched from the GitHub **contribution graph** (GraphQL), which includes private activity when your token has `read:user` and your profile shows private contributions. Merged PRs and closed assigned issues use the authenticated Search API (includes private repositories your token can access via `repo`).
+Commits are fetched from the GitHub **contribution graph** (GraphQL), which includes private activity when your token has `read:user` and your profile shows private contributions. Merged PRs and closed assigned issues use the authenticated Search API (includes private repositories your token can access via `repo`).
 
 See [GitHub token](#github-token-one-token-for-both-crons) above for the single shared `GITHUB_TOKEN`.
 
@@ -113,7 +111,7 @@ The stats scheduler is a **separate process** from the activity scheduler when r
 Stats gist embed:
 
 ```markdown
-![GitHub stats](https://gist.githubusercontent.com/your-username/STATS_GIST_ID/raw/stats.gif)
+![GitHub stats](https://gist.githubusercontent.com/your-username/STATS_GIST_ID/raw/stats.png)
 ```
 
 ## Configuration
@@ -123,17 +121,17 @@ Stats gist embed:
 | `GITHUB_USERNAME` | Yes | — | generate, scheduler, generate:stats, scheduler:stats |
 | `GITHUB_TOKEN` | Yes | — | all generators; required when `GIST_ID` or `STATS_GIST_ID` is set |
 | `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
-| `STATS_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-stats.gif` | generate:stats, upload:stats |
-| `SLIDE_DURATION_SEC` | No | `3` | generate, generate:stats |
+| `STATS_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-stats.png` | generate:stats, upload:stats |
+| `SLIDE_DURATION_SEC` | No | `3` | generate |
 | `CARD_WIDTH` | No | `450` | generate, generate:stats |
 | `CARD_HEIGHT` | No | `124` | generate, generate:stats |
-| `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale; GIF encodes at `CARD_WIDTH ×` this) |
-| `GIF_MAX_COLORS` | No | `256` | generate, generate:stats (ffmpeg palette size, 2–256) |
-| `GIF_BAYER_SCALE` | No | `2` | generate, generate:stats (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
+| `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale; activity GIF encodes at `CARD_WIDTH ×` this) |
+| `GIF_MAX_COLORS` | No | `256` | generate (ffmpeg palette size, 2–256) |
+| `GIF_BAYER_SCALE` | No | `2` | generate (ffmpeg dither strength, 0–5; lower = sharper, higher = smoother gradients) |
 | `GIST_ID` | For upload | — | upload, scheduler (when set, updates gist after generate) |
 | `GIST_FILENAME` | No | `activity.gif` | upload, scheduler |
 | `STATS_GIST_ID` | For upload:stats | — | upload:stats, scheduler:stats |
-| `STATS_GIST_FILENAME` | No | `stats.gif` | upload:stats, scheduler:stats |
+| `STATS_GIST_FILENAME` | No | `stats.png` | upload:stats, scheduler:stats |
 | `CRON_TZ` | No | server local | scheduler, scheduler:stats |
 | `SCHEDULER_RUN_ON_START` | No | — | scheduler, scheduler:stats |
 
@@ -158,7 +156,7 @@ GitHub may cache raw gist URLs briefly.
 
 Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
 
-1. Create a **secret** gist with a single file `stats.gif`.
+1. Create a **secret** gist with a single file `stats.png`.
 2. Set `STATS_GIST_ID` (and `STATS_GIST_FILENAME` if needed).
 
 ## Behavior
@@ -169,20 +167,20 @@ Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
 - On API/render/encode failure: logs error, exits non-zero, **does not overwrite** an existing local GIF
 - Scheduler catches errors per run so the process keeps running; failed runs do not publish
 
-### Stats GIF
+### Stats card
 
-- Commits, reviewed PRs, and opened issues: GraphQL contribution graph summed across all years (includes private activity with `read:user` + profile setting)
+- Commits: GraphQL contribution graph summed across all years (includes private activity with `read:user` + profile setting)
 - Merged PRs and closed assigned issues: authenticated Search API (`per_page=1`, includes accessible private repos)
-- Five slides; same failure semantics as activity (does not overwrite existing GIF on error)
+- Single static PNG; same failure semantics as activity (does not overwrite existing file on error)
 
 ## Scripts
 
 | Script | Description |
 |--------|-------------|
 | `npm run generate` | Local activity GIF only |
-| `npm run generate:stats` | Local stats GIF only |
+| `npm run generate:stats` | Local stats card only |
 | `npm run upload` | Push activity GIF to gist (`GIST_ID` required) |
-| `npm run upload:stats` | Push stats GIF to gist (`STATS_GIST_ID` required) |
+| `npm run upload:stats` | Push stats PNG to gist (`STATS_GIST_ID` required) |
 | `npm run scheduler` | Activity cron + generate + optional gist |
 | `npm run scheduler:stats` | Stats cron + generate + optional gist |
 | `npm run schedulers` | Both crons in one process (Docker default) |

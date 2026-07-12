@@ -36,7 +36,7 @@ describe('fetchGitHubStats', () => {
     };
   }
 
-  it('fetches search counts and contribution graph totals', async () => {
+  it('fetches search counts and commit total from contribution graph', async () => {
     const calls = [];
 
     global.fetch = jest.fn(async (url, init) => {
@@ -57,13 +57,9 @@ describe('fetchGitHubStats', () => {
           user: {
             y2024: {
               totalCommitContributions: 1000,
-              totalPullRequestReviewContributions: 50,
-              totalIssueContributions: 8,
             },
             y2025: {
               totalCommitContributions: 2053,
-              totalPullRequestReviewContributions: 78,
-              totalIssueContributions: 11,
             },
           },
         });
@@ -88,9 +84,7 @@ describe('fetchGitHubStats', () => {
     expect(stats).toEqual({
       commits: 3053,
       mergedPrs: 42,
-      prReviews: 128,
       closedIssues: 7,
-      openedIssues: 19,
     });
 
     const searchCalls = calls.filter((call) => call.url.includes('/search/issues'));
@@ -121,8 +115,6 @@ describe('fetchGitHubStats', () => {
           user: {
             y2025: {
               totalCommitContributions: 1,
-              totalPullRequestReviewContributions: 1,
-              totalIssueContributions: 1,
             },
           },
         });

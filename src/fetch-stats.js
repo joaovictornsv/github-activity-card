@@ -89,7 +89,7 @@ async function fetchContributionYears(config) {
   return years;
 }
 
-function buildContributionsTotalsQuery(username, years) {
+function buildCommitsTotalsQuery(username, years) {
   const login = JSON.stringify(username);
   const collectionFields = years
     .map((year) => {
@@ -97,8 +97,6 @@ function buildContributionsTotalsQuery(username, years) {
       return `
     y${year}: contributionsCollection(from: ${JSON.stringify(from)}, to: ${JSON.stringify(to)}) {
       totalCommitContributions
-      totalPullRequestReviewContributions
-      totalIssueContributions
     }`;
     })
     .join('');
@@ -109,14 +107,14 @@ function buildContributionsTotalsQuery(username, years) {
 }`;
 }
 
-async function fetchContributionTotals(config) {
+async function fetchCommitTotal(config) {
   const years = await fetchContributionYears(config);
   if (years.length === 0) {
-    return { commits: 0, prReviews: 0, openedIssues: 0 };
+    return 0;
   }
 
   const data = await graphqlRequest(
-    buildContributionsTotalsQuery(config.username, years),
+    buildCommitsTotalsQuery(config.username, years),
     config,
   );
 
@@ -126,8 +124,6 @@ async function fetchContributionTotals(config) {
   }
 
   let commits = 0;
-  let prReviews = 0;
-  let openedIssues = 0;
 
   for (const year of years) {
     const collection = user[`y${year}`];
@@ -139,11 +135,9 @@ async function fetchContributionTotals(config) {
     }
 
     commits += collection.totalCommitContributions;
-    prReviews += collection.totalPullRequestReviewContributions;
-    openedIssues += collection.totalIssueContributions;
   }
 
-  return { commits, prReviews, openedIssues };
+  return commits;
 }
 
 async function searchIssuesCount(query, config, label) {
@@ -181,7 +175,7 @@ async function searchIssuesCount(query, config, label) {
 export async function fetchGitHubStats(config) {
   const { username } = config;
 
-  const [searchCounts, contributionTotals] = await Promise.all([
+  const [searchCounts, commits] = await Promise.all([
     Promise.all([
       searchIssuesCount(
         STAT_SEARCH_QUERIES.mergedPrs(username),
@@ -194,23 +188,20 @@ export async function fetchGitHubStats(config) {
         'closed assigned issues',
       ),
     ]),
-    fetchContributionTotals(config),
+    fetchCommitTotal(config),
   ]);
 
   const [mergedPrs, closedIssues] = searchCounts;
 
   return {
-    commits: contributionTotals.commits,
+    commits,
     mergedPrs,
-    prReviews: contributionTotals.prReviews,
     closedIssues,
-    openedIssues: contributionTotals.openedIssues,
   };
 }
 
 /** @deprecated Use STAT_SEARCH_QUERIES */
 export const STAT_QUERIES = {
   ...STAT_SEARCH_QUERIES,
-  prReviews: (username) => `type:pr reviewed-by:${username}`,
   commits: (username) => `author:${username}`,
 };

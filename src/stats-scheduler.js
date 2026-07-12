@@ -1,10 +1,10 @@
 import cron from 'node-cron';
 import { fileURLToPath } from 'node:url';
 import { loadStatsConfig, loadStatsGistConfig } from './config.js';
-import { generateStatsGif } from './generate-stats.js';
+import { generateStatsPng } from './generate-stats.js';
 import { startHealthServer } from './health-server.js';
 import { GENERATION_CRON_EXPRESSIONS } from './scheduler.js';
-import { publishStatsGif } from './upload-stats.js';
+import { publishStatsPng } from './upload-stats.js';
 
 export async function runStatsScheduledJob() {
   const startedAt = new Date().toISOString();
@@ -12,12 +12,12 @@ export async function runStatsScheduledJob() {
 
   try {
     const appConfig = loadStatsConfig();
-    const outputPath = await generateStatsGif(appConfig);
+    const outputPath = await generateStatsPng(appConfig);
 
     const gistConfig = loadStatsGistConfig();
     if (gistConfig) {
       console.log('Updating stats gist…');
-      await publishStatsGif(outputPath, gistConfig);
+      await publishStatsPng(outputPath, gistConfig);
     }
 
     console.log(`[${new Date().toISOString()}] Stats scheduled run finished`);
@@ -27,7 +27,7 @@ export async function runStatsScheduledJob() {
       `[${new Date().toISOString()}] Stats scheduled run failed: ${message}`,
     );
     console.error(
-      'Local output GIF was left unchanged on failure.',
+      'Local output PNG was left unchanged on failure.',
     );
   }
 }

@@ -22,8 +22,8 @@ export function activityGifFilename(username) {
   return `${username}-activity.gif`;
 }
 
-export function statsGifFilename(username) {
-  return `${username}-stats.gif`;
+export function statsPngFilename(username) {
+  return `${username}-stats.png`;
 }
 
 export const APP_REQUIRED_ENV_VARS = ['GITHUB_USERNAME', 'GITHUB_TOKEN'];
@@ -169,9 +169,10 @@ export function loadStatsConfig() {
     outputPath: path.resolve(
       projectRoot,
       process.env.STATS_OUTPUT_PATH?.trim() ||
-        path.join('output', statsGifFilename(env.GITHUB_USERNAME)),
+        path.join('output', statsPngFilename(env.GITHUB_USERNAME)),
     ),
     ...loadSharedRenderConfig(),
+    statsTimezone: process.env.CRON_TZ?.trim() || undefined,
   };
 }
 
@@ -190,7 +191,7 @@ export function loadStatsGistConfig() {
     );
   }
 
-  const filename = process.env.STATS_GIST_FILENAME?.trim() || 'stats.gif';
+  const filename = process.env.STATS_GIST_FILENAME?.trim() || 'stats.png';
   if (!filename) {
     throw new Error('Invalid STATS_GIST_FILENAME: must not be empty');
   }
