@@ -1,38 +1,31 @@
 import cron from 'node-cron';
 import { fileURLToPath } from 'node:url';
-import { loadConfig, loadGistConfig } from './config.js';
-import { generateActivityGif } from './generate.js';
+import { loadStatsConfig, loadStatsGistConfig } from './config.js';
+import { generateStatsGif } from './generate-stats.js';
 import { startHealthServer } from './health-server.js';
-import { publishActivityGif } from './upload.js';
+import { GENERATION_CRON_EXPRESSIONS } from './scheduler.js';
+import { publishStatsGif } from './upload-stats.js';
 
-/** 9 AM, midday, 3 PM, 6 PM, 9 PM, midnight (server local time). */
-export const GENERATION_CRON_EXPRESSIONS = [
-  '0 9 * * *',
-  '0 12 * * *',
-  '0 15 * * *',
-  '0 18 * * *',
-  '0 21 * * *',
-  '0 0 * * *',
-];
-
-export async function runActivityScheduledJob() {
+export async function runStatsScheduledJob() {
   const startedAt = new Date().toISOString();
-  console.log(`[${startedAt}] Scheduled run started`);
+  console.log(`[${startedAt}] Stats scheduled run started`);
 
   try {
-    const appConfig = loadConfig();
-    const outputPath = await generateActivityGif(appConfig);
+    const appConfig = loadStatsConfig();
+    const outputPath = await generateStatsGif(appConfig);
 
-    const gistConfig = loadGistConfig();
+    const gistConfig = loadStatsGistConfig();
     if (gistConfig) {
-      console.log('Updating gist…');
-      await publishActivityGif(outputPath, gistConfig);
+      console.log('Updating stats gist…');
+      await publishStatsGif(outputPath, gistConfig);
     }
 
-    console.log(`[${new Date().toISOString()}] Scheduled run finished`);
+    console.log(`[${new Date().toISOString()}] Stats scheduled run finished`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    console.error(`[${new Date().toISOString()}] Scheduled run failed: ${message}`);
+    console.error(
+      `[${new Date().toISOString()}] Stats scheduled run failed: ${message}`,
+    );
     console.error(
       'Local output GIF was left unchanged on failure.',
     );
@@ -40,14 +33,14 @@ export async function runActivityScheduledJob() {
 }
 
 function main() {
-  loadConfig();
-  loadGistConfig();
+  loadStatsConfig();
+  loadStatsGistConfig();
   startHealthServer();
 
   const timezone = process.env.CRON_TZ?.trim();
   const scheduleLabel = GENERATION_CRON_EXPRESSIONS.join(', ');
 
-  console.log('GitHub Activity Card scheduler');
+  console.log('GitHub Stats Card scheduler');
   console.log(`Cron: ${scheduleLabel}`);
   if (timezone) {
     console.log(`Timezone: ${timezone}`);
@@ -60,14 +53,14 @@ function main() {
     cron.schedule(
       expression,
       () => {
-        void runActivityScheduledJob();
+        void runStatsScheduledJob();
       },
       timezone ? { timezone } : undefined,
     );
   }
 
   if (process.env.SCHEDULER_RUN_ON_START === '1') {
-    void runActivityScheduledJob();
+    void runStatsScheduledJob();
   }
 }
 
