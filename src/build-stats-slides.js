@@ -6,27 +6,33 @@ function formatCount(value) {
 
 const STAT_DEFINITIONS = [
   {
+    key: 'commits',
+    action: 'Commits',
+    icon: 'commit',
+    iconColor: ACTIVITY_COLORS.green,
+  },
+  {
     key: 'mergedPrs',
-    action: 'Merged pull requests',
+    action: 'Merged PRs',
     icon: 'pull-request',
     iconColor: ACTIVITY_COLORS.purple,
   },
   {
-    key: 'closedAssignedIssues',
-    action: 'Closed issues (assigned)',
-    icon: 'issue',
-    iconColor: ACTIVITY_COLORS.purple,
-  },
-  {
     key: 'prReviews',
-    action: 'Pull request reviews',
+    action: 'Reviewed PRs',
     icon: 'comment',
     iconColor: ACTIVITY_COLORS.blue,
   },
   {
-    key: 'commits',
-    action: 'Commits',
-    icon: 'commit',
+    key: 'closedIssues',
+    action: 'Closed issues',
+    icon: 'issue',
+    iconColor: ACTIVITY_COLORS.purple,
+  },
+  {
+    key: 'openedIssues',
+    action: 'Opened issues',
+    icon: 'issue',
     iconColor: ACTIVITY_COLORS.green,
   },
 ];

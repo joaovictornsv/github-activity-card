@@ -58,10 +58,12 @@ describe('fetchGitHubStats', () => {
             y2024: {
               totalCommitContributions: 1000,
               totalPullRequestReviewContributions: 50,
+              totalIssueContributions: 8,
             },
             y2025: {
               totalCommitContributions: 2053,
               totalPullRequestReviewContributions: 78,
+              totalIssueContributions: 11,
             },
           },
         });
@@ -84,10 +86,11 @@ describe('fetchGitHubStats', () => {
     });
 
     expect(stats).toEqual({
-      mergedPrs: 42,
-      closedAssignedIssues: 7,
-      prReviews: 128,
       commits: 3053,
+      mergedPrs: 42,
+      prReviews: 128,
+      closedIssues: 7,
+      openedIssues: 19,
     });
 
     const searchCalls = calls.filter((call) => call.url.includes('/search/issues'));
@@ -119,6 +122,7 @@ describe('fetchGitHubStats', () => {
             y2025: {
               totalCommitContributions: 1,
               totalPullRequestReviewContributions: 1,
+              totalIssueContributions: 1,
             },
           },
         });
@@ -145,7 +149,7 @@ describe('fetchGitHubStats', () => {
     expect(STAT_SEARCH_QUERIES.mergedPrs('octocat')).toBe(
       'author:octocat type:pr is:merged',
     );
-    expect(STAT_SEARCH_QUERIES.closedAssignedIssues('octocat')).toBe(
+    expect(STAT_SEARCH_QUERIES.closedIssues('octocat')).toBe(
       'assignee:octocat type:issue is:closed',
     );
     expect(STAT_QUERIES.commits('octocat')).toBe('author:octocat');

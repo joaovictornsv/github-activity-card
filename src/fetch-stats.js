@@ -6,8 +6,7 @@ const USER_AGENT = 'github-activity-card/0.1';
 /** Search queries for metrics not available on the contribution graph. */
 export const STAT_SEARCH_QUERIES = {
   mergedPrs: (username) => `author:${username} type:pr is:merged`,
-  closedAssignedIssues: (username) =>
-    `assignee:${username} type:issue is:closed`,
+  closedIssues: (username) => `assignee:${username} type:issue is:closed`,
 };
 
 function buildHeaders(config, accept = 'application/vnd.github+json') {
@@ -99,6 +98,7 @@ function buildContributionsTotalsQuery(username, years) {
     y${year}: contributionsCollection(from: ${JSON.stringify(from)}, to: ${JSON.stringify(to)}) {
       totalCommitContributions
       totalPullRequestReviewContributions
+      totalIssueContributions
     }`;
     })
     .join('');
@@ -112,7 +112,7 @@ function buildContributionsTotalsQuery(username, years) {
 async function fetchContributionTotals(config) {
   const years = await fetchContributionYears(config);
   if (years.length === 0) {
-    return { commits: 0, prReviews: 0 };
+    return { commits: 0, prReviews: 0, openedIssues: 0 };
   }
 
   const data = await graphqlRequest(
@@ -127,6 +127,7 @@ async function fetchContributionTotals(config) {
 
   let commits = 0;
   let prReviews = 0;
+  let openedIssues = 0;
 
   for (const year of years) {
     const collection = user[`y${year}`];
@@ -139,9 +140,10 @@ async function fetchContributionTotals(config) {
 
     commits += collection.totalCommitContributions;
     prReviews += collection.totalPullRequestReviewContributions;
+    openedIssues += collection.totalIssueContributions;
   }
 
-  return { commits, prReviews };
+  return { commits, prReviews, openedIssues };
 }
 
 async function searchIssuesCount(query, config, label) {
@@ -187,7 +189,7 @@ export async function fetchGitHubStats(config) {
         'merged pull requests',
       ),
       searchIssuesCount(
-        STAT_SEARCH_QUERIES.closedAssignedIssues(username),
+        STAT_SEARCH_QUERIES.closedIssues(username),
         config,
         'closed assigned issues',
       ),
@@ -195,13 +197,14 @@ export async function fetchGitHubStats(config) {
     fetchContributionTotals(config),
   ]);
 
-  const [mergedPrs, closedAssignedIssues] = searchCounts;
+  const [mergedPrs, closedIssues] = searchCounts;
 
   return {
-    mergedPrs,
-    closedAssignedIssues,
-    prReviews: contributionTotals.prReviews,
     commits: contributionTotals.commits,
+    mergedPrs,
+    prReviews: contributionTotals.prReviews,
+    closedIssues,
+    openedIssues: contributionTotals.openedIssues,
   };
 }
 

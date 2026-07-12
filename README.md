@@ -2,7 +2,7 @@
 
 A daily-updated GIF slideshow of your last public GitHub activities, for README embedding.
 
-A companion **stats GIF** shows all-time totals (merged PRs, closed assigned issues, PR reviews, commits) using the same card UI.
+A companion **stats GIF** shows all-time totals (commits, merged PRs, reviewed PRs, closed issues, opened issues) using the same card UI.
 
 Generate locally with `npm run generate` (activity) or `npm run generate:stats` (stats), or run a scheduler to refresh on a fixed cadence and optionally publish to a GitHub gist.
 
@@ -88,14 +88,15 @@ npm run generate:stats
 npm run generate:stats -- --dry-fetch
 ```
 
-Stats shown (all-time):
+Stats shown (all-time, in slide order):
 
-- Merged pull requests (authored)
-- Closed issues (assigned to you)
-- Pull request reviews
-- Commits
+1. Commits
+2. Merged PRs
+3. Reviewed PRs
+4. Closed issues (assigned)
+5. Opened issues
 
-Commits and PR reviews are fetched from the GitHub **contribution graph** (GraphQL), which includes private activity when your token has `read:user` and your profile shows private contributions. Merged PRs and closed assigned issues use the authenticated Search API (includes private repositories your token can access via `repo`).
+Commits, reviewed PRs, and opened issues are fetched from the GitHub **contribution graph** (GraphQL), which includes private activity when your token has `read:user` and your profile shows private contributions. Merged PRs and closed assigned issues use the authenticated Search API (includes private repositories your token can access via `repo`).
 
 See [GitHub token](#github-token-one-token-for-both-crons) above for the single shared `GITHUB_TOKEN`.
 
@@ -170,9 +171,9 @@ Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
 
 ### Stats GIF
 
-- Commits and PR reviews: GraphQL contribution graph summed across all years (includes private activity with `read:user` + profile setting)
+- Commits, reviewed PRs, and opened issues: GraphQL contribution graph summed across all years (includes private activity with `read:user` + profile setting)
 - Merged PRs and closed assigned issues: authenticated Search API (`per_page=1`, includes accessible private repos)
-- Four slides; same failure semantics as activity (does not overwrite existing GIF on error)
+- Five slides; same failure semantics as activity (does not overwrite existing GIF on error)
 
 ## Scripts
 

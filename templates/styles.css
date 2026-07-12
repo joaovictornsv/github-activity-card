@@ -150,7 +150,7 @@ body {
 
 .card[data-kind='stats'] {
   justify-content: flex-start;
-  padding: 10px 14px;
+  padding: 6px 14px 8px;
 }
 
 .card[data-kind='stats'] .activity-layout {
@@ -159,10 +159,11 @@ body {
 
 .card[data-kind='stats'] .stats-layout {
   display: flex;
+  gap: 4px;
 }
 
 .stats-username {
-  font-size: 14px;
+  font-size: 11px;
   line-height: 1.2;
 }
 
@@ -172,19 +173,19 @@ body {
   justify-content: space-between;
   flex: 1;
   min-width: 0;
-  gap: 12px;
+  gap: 8px;
 }
 
 .stats-main {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 5px;
   min-width: 0;
   flex: 1;
 }
 
 .stats-count {
-  font-size: 52px;
+  font-size: 36px;
   font-weight: 600;
   line-height: 1;
   color: #e6edf3;
@@ -192,16 +193,16 @@ body {
 }
 
 .stats-label {
-  font-size: 20px;
+  font-size: 14px;
   min-width: 0;
 }
 
 .stats-icon {
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
 }
 
 .stats-icon .octicon {
-  width: 30px;
-  height: 30px;
+  width: 22px;
+  height: 22px;
 }
