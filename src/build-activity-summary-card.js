@@ -1,7 +1,6 @@
 import { formatStatsDate } from './build-stats-card.js';
 
 export const ACTIVITY_SUMMARY_MAX_ITEMS = 4;
-export const ACTIVITY_SUMMARY_TITLE = 'Last activity';
 
 function summaryText(slide) {
   if (slide.kind === 'empty') {
@@ -15,7 +14,7 @@ function buildCardMeta(config, options = {}) {
   const updatedAt = options.updatedAt ?? new Date();
 
   return {
-    title: ACTIVITY_SUMMARY_TITLE,
+    username: config.username,
     lastUpdated: formatStatsDate(
       updatedAt,
       config.activitySummaryTimezone,

@@ -1,12 +1,12 @@
 import { describe, expect, it } from '@jest/globals';
 import {
   ACTIVITY_SUMMARY_MAX_ITEMS,
-  ACTIVITY_SUMMARY_TITLE,
   buildActivitySummaryCard,
 } from './build-activity-summary-card.js';
 import { ACTIVITY_COLORS } from './icons.js';
 
 const config = {
+  username: 'octocat',
   activitySummaryTimezone: 'America/Sao_Paulo',
 };
 
@@ -67,7 +67,7 @@ describe('buildActivitySummaryCard', () => {
       { updatedAt: new Date('2026-07-12T15:00:00Z') },
     );
 
-    expect(card.title).toBe(ACTIVITY_SUMMARY_TITLE);
+    expect(card.username).toBe('octocat');
     expect(card.lastUpdated).toBe('Jul 12, 2026, 12:00 PM GMT-3');
     expect(card.isEmpty).toBe(false);
     expect(card.items).toHaveLength(ACTIVITY_SUMMARY_MAX_ITEMS);
@@ -135,7 +135,7 @@ describe('buildActivitySummaryCard', () => {
     );
 
     expect(card.isEmpty).toBe(true);
-    expect(card.title).toBe(ACTIVITY_SUMMARY_TITLE);
+    expect(card.username).toBe('octocat');
     expect(card.items).toEqual([
       {
         kind: 'empty',

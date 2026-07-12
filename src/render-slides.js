@@ -61,7 +61,7 @@ async function buildActivitySummaryCardHtml(card, config) {
   );
   const template = await fs.readFile(templatePath, 'utf8');
   const filled = template
-    .replace(/\{\{TITLE\}\}/g, escapeHtml(card.title))
+    .replace(/\{\{USERNAME\}\}/g, escapeHtml(card.username))
     .replace(/\{\{LAST_UPDATED\}\}/g, escapeHtml(card.lastUpdated))
     .replace(
       /\{\{ACTIVITY_ITEMS\}\}/g,
