@@ -132,7 +132,7 @@ describe('loadActivitySummaryGistConfig', () => {
     expect(loadActivitySummaryGistConfig()).toEqual({
       gistId: 'abc123',
       token: 'ghp_test',
-      filename: 'activity-summary.png',
+      filename: 'last-activity.png',
     });
   });
 

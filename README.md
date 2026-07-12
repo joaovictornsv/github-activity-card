@@ -115,7 +115,7 @@ Set `SCHEDULER_RUN_ON_START=1` in `.env` to run once immediately on startup (use
 | `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale) |
 | `GIST_ID` | For upload | — | upload, scheduler (activity summary gist fallback) |
 | `ACTIVITY_SUMMARY_GIST_ID` | For upload | falls back to `GIST_ID` | upload, scheduler |
-| `ACTIVITY_SUMMARY_GIST_FILENAME` | No | `activity-summary.png` | upload, scheduler |
+| `ACTIVITY_SUMMARY_GIST_FILENAME` | No | `last-activity.png` | upload, scheduler |
 | `STATS_GIST_ID` | For upload:stats | — | upload:stats, scheduler:stats |
 | `STATS_GIST_FILENAME` | No | `stats.png` | upload:stats, scheduler:stats |
 | `CRON_TZ` | No | server local | scheduler, scheduler:stats |
@@ -127,15 +127,15 @@ Binary PNGs are pushed via **git** (the Gist REST `content` field is text-only a
 
 **Activity summary:**
 
-1. Create a **secret** gist with a single file `activity-summary.png` (any placeholder content).
+1. Create a **secret** gist with a single file `last-activity.png` (any placeholder content).
 2. Copy the gist ID from the URL (`https://gist.github.com/you/<gist-id>`).
 3. Set `GIST_ID` or `ACTIVITY_SUMMARY_GIST_ID` and ensure `GITHUB_TOKEN` has the [required scopes](#github-token-one-token-for-both-crons).
-4. Optional: `ACTIVITY_SUMMARY_GIST_FILENAME` if your gist file is not named `activity-summary.png`.
+4. Optional: `ACTIVITY_SUMMARY_GIST_FILENAME` if your gist file is not named `last-activity.png`.
 
 Embed:
 
 ```markdown
-![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/activity-summary.png)
+![GitHub activity](https://gist.githubusercontent.com/your-username/GIST_ID/raw/last-activity.png)
 ```
 
 **Stats:**

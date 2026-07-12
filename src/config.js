@@ -145,7 +145,7 @@ export function loadActivitySummaryGistConfig() {
 
   const filename =
     process.env.ACTIVITY_SUMMARY_GIST_FILENAME?.trim() ||
-    'activity-summary.png';
+    'last-activity.png';
   if (!filename) {
     throw new Error('Invalid ACTIVITY_SUMMARY_GIST_FILENAME: must not be empty');
   }
