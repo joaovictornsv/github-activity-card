@@ -138,7 +138,7 @@ function loadSharedRenderConfig() {
       process.env.SLIDE_DURATION_SEC,
       3,
     ),
-    cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 470),
+    cardWidth: parsePositiveInt(process.env.CARD_WIDTH, 450),
     cardHeight: parsePositiveInt(process.env.CARD_HEIGHT, 124),
     deviceScaleFactor: parsePositiveInt(process.env.DEVICE_SCALE_FACTOR, 2),
     gifMaxColors: parseIntInRange(

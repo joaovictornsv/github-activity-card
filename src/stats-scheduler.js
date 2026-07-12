@@ -1,11 +1,12 @@
 import cron from 'node-cron';
+import { fileURLToPath } from 'node:url';
 import { loadStatsConfig, loadStatsGistConfig } from './config.js';
 import { generateStatsGif } from './generate-stats.js';
 import { startHealthServer } from './health-server.js';
 import { GENERATION_CRON_EXPRESSIONS } from './scheduler.js';
 import { publishStatsGif } from './upload-stats.js';
 
-async function runScheduledJob() {
+export async function runStatsScheduledJob() {
   const startedAt = new Date().toISOString();
   console.log(`[${startedAt}] Stats scheduled run started`);
 
@@ -52,21 +53,25 @@ function main() {
     cron.schedule(
       expression,
       () => {
-        void runScheduledJob();
+        void runStatsScheduledJob();
       },
       timezone ? { timezone } : undefined,
     );
   }
 
   if (process.env.SCHEDULER_RUN_ON_START === '1') {
-    void runScheduledJob();
+    void runStatsScheduledJob();
   }
 }
 
-try {
-  main();
-} catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  console.error(`Configuration error: ${message}`);
-  process.exit(1);
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  try {
+    main();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`Configuration error: ${message}`);
+    process.exit(1);
+  }
 }

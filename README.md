@@ -107,7 +107,7 @@ npm run upload:stats
 npm run scheduler:stats
 ```
 
-The stats scheduler is a **separate process** from the activity scheduler. Run both if you want both GIFs updated (e.g. two deployments or two processes).
+The stats scheduler is a **separate process** from the activity scheduler when run locally (`npm run scheduler` vs `npm run scheduler:stats`). The Docker image runs **both** via `src/schedulers.js` (`npm run schedulers`).
 
 Stats gist embed:
 
@@ -124,7 +124,7 @@ Stats gist embed:
 | `OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-activity.gif` | generate, upload |
 | `STATS_OUTPUT_PATH` | No | `output/{GITHUB_USERNAME}-stats.gif` | generate:stats, upload:stats |
 | `SLIDE_DURATION_SEC` | No | `3` | generate, generate:stats |
-| `CARD_WIDTH` | No | `470` | generate, generate:stats |
+| `CARD_WIDTH` | No | `450` | generate, generate:stats |
 | `CARD_HEIGHT` | No | `124` | generate, generate:stats |
 | `DEVICE_SCALE_FACTOR` | No | `2` | generate, generate:stats (Playwright screenshot scale; GIF encodes at `CARD_WIDTH ×` this) |
 | `GIF_MAX_COLORS` | No | `256` | generate, generate:stats (ffmpeg palette size, 2–256) |
@@ -184,4 +184,5 @@ Same git-based flow as activity; use a separate gist and `STATS_GIST_ID`:
 | `npm run upload:stats` | Push stats GIF to gist (`STATS_GIST_ID` required) |
 | `npm run scheduler` | Activity cron + generate + optional gist |
 | `npm run scheduler:stats` | Stats cron + generate + optional gist |
+| `npm run schedulers` | Both crons in one process (Docker default) |
 | `npm run check:token` | Verify `GITHUB_TOKEN` scopes for both crons |
